@@ -61,6 +61,12 @@ export class RoomNotFoundError extends Error {
   }
 }
 
+export class RoomExpiredError extends Error {
+  constructor() {
+    super("Room expired");
+  }
+}
+
 export class RoomUnauthorizedError extends Error {
   constructor() {
     super("Invalid player token");
@@ -97,6 +103,7 @@ export function roomPlayerForToken(
 
 export class InMemoryRoomStore implements RoomStore {
   private readonly rooms = new Map<string, RoomState>();
+  private readonly expiredCodes = new Set<string>();
   private readonly now: () => number;
   private readonly randomCode: () => string;
   private readonly randomToken: () => string;
@@ -137,16 +144,14 @@ export class InMemoryRoomStore implements RoomStore {
       expiresAt: now + ROOM_TTL_MS,
     };
     this.rooms.set(code, room);
+    this.expiredCodes.delete(code);
     return { code, playerToken };
   }
 
   async get(code: string, token: string): Promise<RoomState> {
     const now = this.now();
     await this.expire(now);
-    const room = this.rooms.get(code);
-    if (!room) {
-      throw new RoomNotFoundError();
-    }
+    const room = this.requireRoom(code);
 
     const player = roomPlayerForToken(room, token);
     if (!player) {
@@ -162,10 +167,7 @@ export class InMemoryRoomStore implements RoomStore {
   async join(code: string, card: Card): Promise<RoomCredentials> {
     const now = this.now();
     await this.expire(now);
-    const room = this.rooms.get(code);
-    if (!room) {
-      throw new RoomNotFoundError();
-    }
+    const room = this.requireRoom(code);
     if (room.players.B) {
       throw new RoomFullError();
     }
@@ -185,10 +187,7 @@ export class InMemoryRoomStore implements RoomStore {
   ): Promise<RoomState> {
     const now = this.now();
     await this.expire(now);
-    const room = this.rooms.get(code);
-    if (!room) {
-      throw new RoomNotFoundError();
-    }
+    const room = this.requireRoom(code);
     const player = roomPlayerForToken(room, token);
     if (!player) {
       throw new RoomUnauthorizedError();
@@ -235,6 +234,7 @@ export class InMemoryRoomStore implements RoomStore {
     for (const [code, room] of this.rooms) {
       if (room.expiresAt <= now) {
         this.rooms.delete(code);
+        this.expiredCodes.add(code);
         expired += 1;
       }
     }
@@ -243,5 +243,17 @@ export class InMemoryRoomStore implements RoomStore {
 
   clear(): void {
     this.rooms.clear();
+    this.expiredCodes.clear();
+  }
+
+  private requireRoom(code: string): RoomState {
+    const room = this.rooms.get(code);
+    if (room) {
+      return room;
+    }
+    if (this.expiredCodes.has(code)) {
+      throw new RoomExpiredError();
+    }
+    throw new RoomNotFoundError();
   }
 }

@@ -2,6 +2,7 @@ import { BATTLE_STATS } from "@/lib/engine/battle";
 import { RAW_METRICS, type Card, type StatKey } from "@/lib/engine/types";
 import {
   OpponentConnectedError,
+  RoomExpiredError,
   RoomFullError,
   RoomNotFoundError,
   RoomUnauthorizedError,
@@ -97,6 +98,12 @@ export function roomErrorResponse(error: unknown): Response {
     return Response.json(
       { error: "ROOM_NOT_FOUND", message: error.message },
       { status: 404 },
+    );
+  }
+  if (error instanceof RoomExpiredError) {
+    return Response.json(
+      { error: "ROOM_EXPIRED", message: error.message },
+      { status: 410 },
     );
   }
   if (error instanceof RoomUnauthorizedError) {
