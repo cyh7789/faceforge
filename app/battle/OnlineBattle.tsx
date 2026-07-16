@@ -41,21 +41,21 @@ export function nextRoundToAnimate(
 export function onlineRoomErrorMessage(code?: string): string {
   switch (code) {
     case "ROOM_FULL":
-      return "This room is full. Ask for a different room code.";
+      return "房間已滿 · Room full. 換個房號，或建立新房再戰。";
     case "ROOM_NOT_FOUND":
-      return "Room not found. Check the four-digit code or create a new room.";
+      return "找不到房間 · Room not found. 檢查四位數房號，或建立新房。";
     case "ROOM_EXPIRED":
-      return "This room expired. Create a new room and try again.";
+      return "房間已過期 · Room expired. 建立新房就能重新開戰。";
     case "UNAUTHORIZED":
-      return "This player link is no longer valid.";
+      return "玩家連結失效 · Player link expired. 返回大廳重新加入。";
     case "OUT_OF_TURN":
-      return "The turn changed. The room state will refresh automatically.";
+      return "回合剛剛換人 · Turn changed. 戰況會自動更新。";
     case "STAT_USED":
-      return "That stat was already used. Pick another one.";
+      return "這項能力用過了 · Stat already used. 請挑另一項。";
     case "OPPONENT_CONNECTED":
-      return "Your opponent is connected again.";
+      return "對手回來了 · Opponent reconnected. 繼續對戰吧。";
     default:
-      return "Could not reach the room. Check the network and try again.";
+      return "連不上房間 · Could not reach the room. 檢查網路後重試，或返回大廳。";
   }
 }
 
@@ -110,7 +110,14 @@ export function OnlineBattleScreen({
         <span>{status}</span>
       </header>
 
-      {error && <p className={styles.onlineError} role="alert">{error}</p>}
+      {error && (
+        <aside className={styles.onlineError} role="alert">
+          <p>{error}</p>
+          <button type="button" onClick={onLeave}>
+            返回大廳 · Back to Lobby
+          </button>
+        </aside>
+      )}
 
       {room.phase === "waiting" ? (
         <section className={styles.waitingRoom} aria-live="polite">
@@ -289,7 +296,9 @@ function OnlineResult({
         </h2>
         {room.winReason === "forfeit" && (
           <p className={styles.classSubtitle}>
-            {didWin ? "Win by forfeit · 對手斷線" : "Opponent claimed the forfeit"}
+            {didWin
+              ? "Win by forfeit · 對手離線，這局由你收下"
+              : "你離線太久，對手取得勝利 · Opponent claimed the forfeit"}
           </p>
         )}
         <p className={styles.finalScore}>
@@ -404,9 +413,18 @@ export default function OnlineBattle({ code, token, onLeave }: OnlineBattleProps
           <div><p>ONLINE ROOM · {code}</p><h1>Connecting</h1></div>
           <span>SYNC</span>
         </header>
-        <div className={styles.canvasLoading} role="status">
-          {error || "Syncing server battle state…"}
-        </div>
+        {error ? (
+          <div className={`${styles.canvasLoading} ${styles.connectionError}`} role="alert">
+            <p>{error}</p>
+            <button type="button" onClick={onLeave}>
+              返回大廳 · Back to Lobby
+            </button>
+          </div>
+        ) : (
+          <div className={styles.canvasLoading} role="status">
+            同步戰況中… · Syncing server battle state…
+          </div>
+        )}
       </main>
     );
   }

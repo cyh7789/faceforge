@@ -44,7 +44,7 @@
 .backLink,
 .arenaHeader button {
   display: inline-flex;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--color-ff-plum);
@@ -687,7 +687,7 @@
 
 .homeAction {
   grid-column: 1 / -1;
-  min-height: 42px;
+  min-height: 44px;
   padding-top: 12px;
   color: var(--color-ff-plum);
   font-size: 12px;
@@ -719,6 +719,26 @@
   color: var(--color-ff-ink);
   font-size: 10px;
   font-weight: 900;
+}
+
+.onlineLobbyError p,
+.onlineError p,
+.connectionError p {
+  margin: 0;
+}
+
+.onlineLobbyError button,
+.onlineError button,
+.connectionError button {
+  min-height: 44px;
+  margin-top: 9px;
+  padding: 8px 12px;
+  border: 2px solid var(--color-ff-plum);
+  border-radius: 12px;
+  background: var(--color-ff-gold-soft);
+  color: var(--color-ff-ink);
+  font-size: 10px;
+  font-weight: 950;
 }
 
 .onlineLobbyActions {
@@ -805,6 +825,17 @@
   color: var(--color-ff-ink);
   font-size: 11px;
   font-weight: 900;
+  text-align: center;
+}
+
+.onlineError button {
+  width: 100%;
+}
+
+.connectionError {
+  flex-direction: column;
+  gap: 4px;
+  padding-inline: 24px;
   text-align: center;
 }
 
