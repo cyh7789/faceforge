@@ -1,10 +1,13 @@
 import {
+  battleReducer,
   createBattleState,
+  type BattlePlayer,
   type BattleState,
 } from "@/lib/engine/battle";
-import type { Card } from "@/lib/engine/types";
+import type { Card, StatKey } from "@/lib/engine/types";
 
 export const ROOM_TTL_MS = 10 * 60 * 1_000;
+export const PLAYER_DISCONNECTED_MS = 30 * 1_000;
 
 export interface RoomPlayerState {
   token: string;
@@ -30,10 +33,19 @@ export interface RoomCredentials {
   playerToken: string;
 }
 
+export type RoomUpdateAction =
+  | { type: "pick"; pick: StatKey }
+  | { type: "forfeit" };
+
 export interface RoomStore {
   create(card: Card): Promise<RoomCredentials>;
   get(code: string, token: string): Promise<RoomState>;
   join(code: string, card: Card): Promise<RoomCredentials>;
+  update(
+    code: string,
+    token: string,
+    action: RoomUpdateAction,
+  ): Promise<RoomState>;
   expire(now?: number): Promise<number>;
 }
 
@@ -59,6 +71,28 @@ export class RoomFullError extends Error {
   constructor() {
     super("Room is full");
   }
+}
+
+export class RoomWaitingError extends Error {
+  constructor() {
+    super("Waiting for an opponent");
+  }
+}
+
+export class OpponentConnectedError extends Error {
+  constructor() {
+    super("Opponent is still connected");
+  }
+}
+
+export function roomPlayerForToken(
+  room: RoomState,
+  token: string,
+): BattlePlayer | null {
+  if (room.players.A.token === token) {
+    return "A";
+  }
+  return room.players.B?.token === token ? "B" : null;
 }
 
 export class InMemoryRoomStore implements RoomStore {
@@ -114,17 +148,12 @@ export class InMemoryRoomStore implements RoomStore {
       throw new RoomNotFoundError();
     }
 
-    const player =
-      room.players.A.token === token
-        ? room.players.A
-        : room.players.B?.token === token
-          ? room.players.B
-          : null;
+    const player = roomPlayerForToken(room, token);
     if (!player) {
       throw new RoomUnauthorizedError();
     }
 
-    player.lastSeenAt = now;
+    room.players[player]!.lastSeenAt = now;
     room.updatedAt = now;
     room.expiresAt = now + ROOM_TTL_MS;
     return structuredClone(room);
@@ -147,6 +176,58 @@ export class InMemoryRoomStore implements RoomStore {
     room.updatedAt = now;
     room.expiresAt = now + ROOM_TTL_MS;
     return { code, playerToken };
+  }
+
+  async update(
+    code: string,
+    token: string,
+    action: RoomUpdateAction,
+  ): Promise<RoomState> {
+    const now = this.now();
+    await this.expire(now);
+    const room = this.rooms.get(code);
+    if (!room) {
+      throw new RoomNotFoundError();
+    }
+    const player = roomPlayerForToken(room, token);
+    if (!player) {
+      throw new RoomUnauthorizedError();
+    }
+    if (!room.battle || !room.players.B) {
+      throw new RoomWaitingError();
+    }
+
+    room.players[player]!.lastSeenAt = now;
+    room.updatedAt = now;
+    room.expiresAt = now + ROOM_TTL_MS;
+
+    if (action.type === "pick") {
+      room.battle = battleReducer(room.battle, {
+        type: "pick",
+        player,
+        pick: action.pick,
+      });
+      if (room.battle.phase === "complete") {
+        room.winReason = "battle";
+      }
+      return structuredClone(room);
+    }
+
+    if (room.battle.phase === "complete") {
+      throw new Error("Battle is complete");
+    }
+    const opponent: BattlePlayer = player === "A" ? "B" : "A";
+    if (now - room.players[opponent]!.lastSeenAt < PLAYER_DISCONNECTED_MS) {
+      throw new OpponentConnectedError();
+    }
+    room.battle = {
+      ...room.battle,
+      phase: "complete",
+      pendingPick: null,
+      winner: player,
+    };
+    room.winReason = "forfeit";
+    return structuredClone(room);
   }
 
   async expire(now = this.now()): Promise<number> {
