@@ -262,4 +262,23 @@ describe("online room route handlers", () => {
       winReason: "forfeit",
     });
   });
+
+  it("distinguishes an expired room from an unknown room", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-17T01:00:00+08:00"));
+    const creator = await create();
+    vi.advanceTimersByTime(10 * 60 * 1_000 + 1);
+
+    const response = await pollRoom(
+      new Request(
+        `http://localhost/api/room/${creator.body.code}?token=${creator.body.playerToken}`,
+      ),
+      context(creator.body.code),
+    );
+
+    expect(response.status).toBe(410);
+    await expect(json(response)).resolves.toMatchObject({
+      error: "ROOM_EXPIRED",
+    });
+  });
 });
