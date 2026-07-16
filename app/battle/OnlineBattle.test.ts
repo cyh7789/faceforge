@@ -45,13 +45,13 @@ function view(overrides: Partial<OnlineRoomView> = {}): OnlineRoomView {
   };
 }
 
-function render(room: OnlineRoomView, revealedRound: BattleRound | null = null) {
+function render(room: OnlineRoomView, revealedRound: BattleRound | null = null, error = "") {
   return renderToStaticMarkup(
     createElement(OnlineBattleScreen, {
       room,
       revealedRound,
       pending: false,
-      error: "",
+      error,
       onPick: vi.fn(),
       onForfeit: vi.fn(),
       onLeave: vi.fn(),
@@ -108,6 +108,7 @@ describe("online battle polling UX", () => {
     );
     expect(forfeited).toContain("You Win!");
     expect(forfeited).toContain("Win by forfeit");
+    expect(forfeited).toContain("對手離線，這局由你收下");
 
     const draw = render(
       view({ phase: "complete", turn: null, winner: "draw" }),
@@ -116,8 +117,23 @@ describe("online battle polling UX", () => {
   });
 
   it("maps full, missing, and expired room errors to actionable copy", () => {
-    expect(onlineRoomErrorMessage("ROOM_FULL")).toContain("full");
-    expect(onlineRoomErrorMessage("ROOM_NOT_FOUND")).toContain("not found");
-    expect(onlineRoomErrorMessage("ROOM_EXPIRED")).toContain("expired");
+    expect(onlineRoomErrorMessage("ROOM_FULL")).toContain("房間已滿 · Room full");
+    expect(onlineRoomErrorMessage("ROOM_NOT_FOUND")).toContain(
+      "找不到房間 · Room not found",
+    );
+    expect(onlineRoomErrorMessage("ROOM_EXPIRED")).toContain(
+      "房間已過期 · Room expired",
+    );
+  });
+
+  it("gives an in-room error a clear route back to the lobby", () => {
+    const html = render(
+      view(),
+      null,
+      onlineRoomErrorMessage("ROOM_EXPIRED"),
+    );
+
+    expect(html).toContain("房間已過期 · Room expired");
+    expect(html).toContain("返回大廳 · Back to Lobby");
   });
 });
