@@ -9,53 +9,135 @@ export const BATTLE_STATS: readonly StatKey[] = [
   "grit",
 ];
 
-export type BattleRoundWinner = "A" | "B" | "tie";
+export type BattlePlayer = "A" | "B";
+export type BattleRoundWinner = BattlePlayer | "tie";
+export type BattlePhase = "pickA" | "pickB" | "complete";
 
-export interface BattleRound {
-  round: number;
-  stat: StatKey;
-  cardA: number;
-  cardB: number;
+export interface TurnPick {
+  card: Card;
+  pick: StatKey;
+}
+
+export interface TurnResult {
   winner: BattleRoundWinner;
+  values: Record<BattlePlayer, number>;
 }
 
-export interface BattleResult {
-  winner: "A" | "B";
-  score: {
-    cardA: number;
-    cardB: number;
-  };
+export interface BattleRound extends TurnResult {
+  round: number;
+  picks: Record<BattlePlayer, StatKey>;
+}
+
+export interface BattleState {
+  cards: Record<BattlePlayer, Card>;
+  phase: BattlePhase;
+  score: Record<BattlePlayer, number>;
+  usedStats: Record<BattlePlayer, StatKey[]>;
+  pendingPick: StatKey | null;
   rounds: BattleRound[];
+  winner: BattlePlayer | null;
 }
 
-export function spinBattle(cardA: Card, cardB: Card, rng: () => number): BattleResult {
-  let cardAWins = 0;
-  let cardBWins = 0;
-  const rounds: BattleRound[] = [];
+export type BattleAction = {
+  type: "pick";
+  player: BattlePlayer;
+  pick: StatKey;
+};
 
-  while (cardAWins < 2 && cardBWins < 2) {
-    const stat = BATTLE_STATS[Math.floor(rng() * BATTLE_STATS.length)];
-    const valueA = cardA.stats[stat];
-    const valueB = cardB.stats[stat];
-    const round = cardAWins + cardBWins + 1;
+export function resolveTurn(a: TurnPick, b: TurnPick): TurnResult {
+  const values = {
+    A: a.card.stats[a.pick],
+    B: b.card.stats[b.pick],
+  };
 
-    if (valueA === valueB) {
-      rounds.push({ round, stat, cardA: valueA, cardB: valueB, winner: "tie" });
-      continue;
-    }
-
-    const winner = valueA > valueB ? "A" : "B";
-    if (winner === "A") {
-      cardAWins += 1;
-    } else {
-      cardBWins += 1;
-    }
-    rounds.push({ round, stat, cardA: valueA, cardB: valueB, winner });
+  if (values.A === values.B) {
+    return { winner: "tie", values };
   }
 
   return {
-    winner: cardAWins === 2 ? "A" : "B",
-    score: { cardA: cardAWins, cardB: cardBWins },
-    rounds,
+    winner: values.A > values.B ? "A" : "B",
+    values,
+  };
+}
+
+export function createBattleState(cardA: Card, cardB: Card): BattleState {
+  return {
+    cards: { A: cardA, B: cardB },
+    phase: "pickA",
+    score: { A: 0, B: 0 },
+    usedStats: { A: [], B: [] },
+    pendingPick: null,
+    rounds: [],
+    winner: null,
+  };
+}
+
+export function getAvailableStats(
+  state: BattleState,
+  player: BattlePlayer,
+): StatKey[] {
+  return BATTLE_STATS.filter((stat) => !state.usedStats[player].includes(stat));
+}
+
+export function battleReducer(
+  state: BattleState,
+  action: BattleAction,
+): BattleState {
+  if (state.phase === "complete") {
+    throw new Error("Battle is complete");
+  }
+
+  const expectedPlayer: BattlePlayer = state.phase === "pickA" ? "A" : "B";
+  if (action.player !== expectedPlayer) {
+    throw new Error(`Expected player ${expectedPlayer} to pick`);
+  }
+
+  if (state.usedStats[action.player].includes(action.pick)) {
+    throw new Error(`Player ${action.player} already used ${action.pick}`);
+  }
+
+  if (action.player === "A") {
+    return {
+      ...state,
+      phase: "pickB",
+      usedStats: {
+        ...state.usedStats,
+        A: [...state.usedStats.A, action.pick],
+      },
+      pendingPick: action.pick,
+    };
+  }
+
+  if (state.pendingPick === null) {
+    throw new Error("Player A must pick first");
+  }
+
+  const result = resolveTurn(
+    { card: state.cards.A, pick: state.pendingPick },
+    { card: state.cards.B, pick: action.pick },
+  );
+  const score = { ...state.score };
+  if (result.winner !== "tie") {
+    score[result.winner] += 1;
+  }
+
+  const winner = score.A === 2 ? "A" : score.B === 2 ? "B" : null;
+  const round: BattleRound = {
+    round: state.score.A + state.score.B + 1,
+    picks: { A: state.pendingPick, B: action.pick },
+    ...result,
+  };
+
+  return {
+    ...state,
+    phase: winner ? "complete" : "pickA",
+    score,
+    usedStats: {
+      ...state.usedStats,
+      B: [...state.usedStats.B, action.pick],
+    },
+    pendingPick: null,
+    rounds: [...state.rounds, round],
+    winner,
   };
 }
