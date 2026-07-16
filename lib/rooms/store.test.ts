@@ -7,6 +7,7 @@ import {
 import {
   InMemoryRoomStore,
   OpponentConnectedError,
+  RoomExpiredError,
   RoomFullError,
   RoomNotFoundError,
   RoomUnauthorizedError,
@@ -99,7 +100,7 @@ describe("InMemoryRoomStore", () => {
     expect(await store.expire()).toBe(1);
     await expect(
       store.get(credentials.code, credentials.playerToken),
-    ).rejects.toBeInstanceOf(RoomNotFoundError);
+    ).rejects.toBeInstanceOf(RoomExpiredError);
   });
 
   it("advances the reducer only for the authenticated current player", async () => {
