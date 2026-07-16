@@ -29,6 +29,8 @@ export function isCard(value: unknown): value is Card {
   if (!isObject(value.talent) || !isObject(value.curse) || !isObject(value.rawScores)) {
     return false;
   }
+  const stats = value.stats;
+  const rawScores = value.rawScores;
   return (
     typeof value.id === "string" &&
     typeof value.class.key === "string" &&
@@ -39,13 +41,13 @@ export function isCard(value: unknown): value is Card {
       value.rarity === "rare" ||
       value.rarity === "legendary") &&
     typeof value.weirdness === "number" &&
-    BATTLE_STATS.every((stat) => Number.isFinite(value.stats[stat])) &&
+    BATTLE_STATS.every((stat) => Number.isFinite(stats[stat])) &&
     typeof value.talent.metric === "string" &&
     typeof value.talent.name === "string" &&
     typeof value.curse.metric === "string" &&
     typeof value.curse.name === "string" &&
     typeof value.curse.score === "number" &&
-    RAW_METRICS.every((metric) => Number.isFinite(value.rawScores[metric])) &&
+    RAW_METRICS.every((metric) => Number.isFinite(rawScores[metric])) &&
     value.maskUrl === null &&
     typeof value.roast === "string"
   );
