@@ -39,7 +39,9 @@ function readCollection(): Card[] {
     const parsed: unknown = JSON.parse(
       localStorage.getItem(COLLECTION_STORAGE_KEY) ?? "[]",
     );
-    return Array.isArray(parsed) ? (parsed as Card[]) : [];
+    return Array.isArray(parsed)
+      ? (parsed as Card[]).filter((card) => !card.isPreset)
+      : [];
   } catch {
     return [];
   }
@@ -187,7 +189,7 @@ export default function CollectionHome() {
         </Link>
         <Link href="/battle" className="sticker-button sticker-button-secondary">
           <span className="text-lg">Battle</span>
-          <small>Same-device BO3</small>
+          <small>Quick or 2 players</small>
         </Link>
       </nav>
 

@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { CharacterCard } from "@/components/CharacterCard";
+import {
+  battleDestination,
+  battleReturnQuery,
+} from "@/lib/battle-navigation";
 import { addCard, COLLECTION_STORAGE_KEY } from "@/lib/collection";
 import { PENDING_DRAW_STORAGE_KEY } from "@/lib/draw-session";
 import type { Card, Rarity } from "@/lib/engine/types";
@@ -60,21 +64,14 @@ const GLOW_CLASS: Readonly<Record<Rarity, string>> = {
   legendary: styles.legendaryGlow,
 };
 
-function battleReturnQuery(search: string): string {
-  const params = new URLSearchParams(search);
-  if (params.get("returnTo") !== "battle") {
-    return "";
-  }
-  const player = params.get("player") === "B" ? "B" : "A";
-  return `?returnTo=battle&player=${player}`;
-}
-
 function readStoredCollection(): Card[] {
   try {
     const parsed: unknown = JSON.parse(
       localStorage.getItem(COLLECTION_STORAGE_KEY) ?? "[]",
     );
-    return Array.isArray(parsed) ? (parsed as Card[]) : [];
+    return Array.isArray(parsed)
+      ? (parsed as Card[]).filter((card) => !card.isPreset)
+      : [];
   } catch {
     return [];
   }
@@ -183,11 +180,9 @@ export default function RevealPage() {
     try {
       const next = addCard(readStoredCollection(), card);
       localStorage.setItem(COLLECTION_STORAGE_KEY, JSON.stringify(next));
-      const returnQuery = battleReturnQuery(window.location.search);
-      if (returnQuery) {
-        const params = new URLSearchParams(returnQuery);
-        const player = params.get("player") === "B" ? "B" : "A";
-        router.push(`/battle?player=${player}&card=${encodeURIComponent(card.id)}`);
+      const destination = battleDestination(window.location.search, card.id);
+      if (destination) {
+        router.push(destination);
       } else {
         router.push("/");
       }

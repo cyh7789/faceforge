@@ -5,12 +5,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  battleModeFromSearch,
+  type BattleMode,
+} from "@/lib/battle-navigation";
 import { COLLECTION_STORAGE_KEY } from "@/lib/collection";
 import { CLASS_ASSETS } from "@/lib/engine/assets";
 import type {
   BattlePlayer,
   BattleState,
 } from "@/lib/engine/battle";
+import {
+  APPRENTICE_MOCHI,
+  isPresetCard,
+  NPC_PRESETS,
+  type PresetCard,
+} from "@/lib/engine/presets";
 import { pickRoast } from "@/lib/engine/roast";
 import type { Card, StatKey } from "@/lib/engine/types";
 
@@ -38,36 +48,47 @@ const STAT_LABELS: readonly { key: StatKey; label: string }[] = [
 
 type SelectedCards = Partial<Record<BattlePlayer, Card>>;
 
+interface StoredSelections {
+  cards: SelectedCards;
+  npc: PresetCard;
+}
+
 function readCollection(): Card[] {
   try {
     const parsed: unknown = JSON.parse(
       localStorage.getItem(COLLECTION_STORAGE_KEY) ?? "[]",
     );
-    return Array.isArray(parsed) ? (parsed as Card[]) : [];
+    return Array.isArray(parsed)
+      ? (parsed as Card[]).filter((card) => !card.isPreset)
+      : [];
   } catch {
     return [];
   }
 }
 
-function readStoredSelections(collection: Card[]): SelectedCards {
+function readStoredSelections(collection: Card[]): StoredSelections {
   try {
     const parsed = JSON.parse(
       sessionStorage.getItem(BATTLE_SELECTION_STORAGE_KEY) ?? "{}",
-    ) as Partial<Record<BattlePlayer, string>>;
+    ) as Partial<Record<BattlePlayer | "npc", string>>;
     return {
-      A: collection.find(({ id }) => id === parsed.A),
-      B: collection.find(({ id }) => id === parsed.B),
+      cards: {
+        A: collection.find(({ id }) => id === parsed.A),
+        B: collection.find(({ id }) => id === parsed.B),
+      },
+      npc:
+        NPC_PRESETS.find(({ id }) => id === parsed.npc) ?? APPRENTICE_MOCHI,
     };
   } catch {
-    return {};
+    return { cards: {}, npc: APPRENTICE_MOCHI };
   }
 }
 
-function storeSelections(cards: SelectedCards) {
+function storeSelections(cards: SelectedCards, npc: PresetCard) {
   try {
     sessionStorage.setItem(
       BATTLE_SELECTION_STORAGE_KEY,
-      JSON.stringify({ A: cards.A?.id, B: cards.B?.id }),
+      JSON.stringify({ A: cards.A?.id, B: cards.B?.id, npc: npc.id }),
     );
   } catch {
     // Battle still works when session storage is unavailable.
@@ -78,10 +99,51 @@ function playerLabel(player: BattlePlayer) {
   return player === "A" ? "Player 1" : "Player 2";
 }
 
+function cardNameEn(card: Card): string {
+  return isPresetCard(card) ? card.nameEn : card.class.nameEn;
+}
+
+function cardName(card: Card): string {
+  return isPresetCard(card) ? card.name : card.class.name;
+}
+
+interface BattleModePickerProps {
+  mode: BattleMode;
+  onChange: (mode: BattleMode) => void;
+}
+
+function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
+  return (
+    <section className={styles.modePicker} aria-label="Battle mode">
+      <button
+        type="button"
+        className={mode === "quick" ? styles.activeMode : ""}
+        onClick={() => onChange("quick")}
+        aria-pressed={mode === "quick"}
+      >
+        <strong>Quick Match</strong>
+        <small>單人挑戰 NPC</small>
+      </button>
+      <button
+        type="button"
+        className={mode === "twoPlayers" ? styles.activeMode : ""}
+        onClick={() => onChange("twoPlayers")}
+        aria-pressed={mode === "twoPlayers"}
+      >
+        <strong>2 Players</strong>
+        <small>同機輪流對戰</small>
+      </button>
+    </section>
+  );
+}
+
 export default function BattleGame() {
   const [collection, setCollection] = useState<Card[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [mode, setMode] = useState<BattleMode>("quick");
   const [selected, setSelected] = useState<SelectedCards>({});
+  const [selectedNpc, setSelectedNpc] =
+    useState<PresetCard>(APPRENTICE_MOCHI);
   const [activePlayer, setActivePlayer] = useState<BattlePlayer>("A");
   const [handoff, setHandoff] = useState(false);
   const [inBattle, setInBattle] = useState(false);
@@ -93,18 +155,24 @@ export default function BattleGame() {
       const cards = readCollection();
       const stored = readStoredSelections(cards);
       const params = new URLSearchParams(window.location.search);
+      const returnedMode = battleModeFromSearch(window.location.search);
       const returnedPlayer = params.get("player");
       const returnedCard = params.get("card");
-      const player: BattlePlayer = returnedPlayer === "B" ? "B" : "A";
+      const player: BattlePlayer =
+        returnedMode === "twoPlayers" && returnedPlayer === "B" ? "B" : "A";
       const drawnCard = cards.find(({ id }) => id === returnedCard);
-      const next = drawnCard ? { ...stored, [player]: drawnCard } : stored;
+      const next = drawnCard
+        ? { ...stored.cards, [player]: drawnCard }
+        : stored.cards;
       const nextActivePlayer = player === "B" && !next.A ? "A" : player;
 
       setCollection(cards);
+      setMode(returnedMode);
       setSelected(next);
+      setSelectedNpc(stored.npc);
       if (returnedCard) {
         setActivePlayer(nextActivePlayer);
-        storeSelections(next);
+        storeSelections(next, stored.npc);
       }
       setHydrated(true);
     });
@@ -123,13 +191,35 @@ export default function BattleGame() {
     [loser],
   );
 
+  const opponent = mode === "quick" ? selectedNpc : selected.B;
+
   function chooseCard(card: Card) {
-    const next = { ...selected, [activePlayer]: card };
+    const player = mode === "quick" ? "A" : activePlayer;
+    const next = { ...selected, [player]: card };
     setSelected(next);
-    storeSelections(next);
+    storeSelections(next, selectedNpc);
+  }
+
+  function chooseNpc(card: PresetCard) {
+    setSelectedNpc(card);
+    storeSelections(selected, card);
+  }
+
+  function chooseMode(nextMode: BattleMode) {
+    setMode(nextMode);
+    setResult(undefined);
+    setInBattle(false);
+    setHandoff(false);
+    setActivePlayer("A");
   }
 
   function lockCard() {
+    if (mode === "quick") {
+      if (selected.A) {
+        setInBattle(true);
+      }
+      return;
+    }
     if (!selected[activePlayer]) {
       return;
     }
@@ -158,6 +248,7 @@ export default function BattleGame() {
     setHandoff(false);
     setActivePlayer("A");
     setSelected({});
+    setSelectedNpc(APPRENTICE_MOCHI);
     setMatchKey((key) => key + 1);
     try {
       sessionStorage.removeItem(BATTLE_SELECTION_STORAGE_KEY);
@@ -182,13 +273,14 @@ export default function BattleGame() {
           <p>FACEFORGE BATTLE</p>
           <span aria-hidden="true" />
         </header>
+        <BattleModePicker mode={mode} onChange={chooseMode} />
         <section className={styles.emptyPanel}>
           <div className={styles.emptyVs} aria-hidden="true">VS</div>
           <p className={styles.eyebrow}>YOUR ROSTER IS EMPTY</p>
           <h1>Draw a hero first</h1>
           <p>先抽一張臉鬥士卡，魔鏡才有選手可以派上場。</p>
           <Link
-            href="/draw?returnTo=battle&player=A"
+            href={`/draw?returnTo=battle&mode=${mode}&player=A`}
             className="sticker-button sticker-button-primary"
           >
             <span>Draw First Card</span>
@@ -199,7 +291,7 @@ export default function BattleGame() {
     );
   }
 
-  if (inBattle && selected.A && selected.B) {
+  if (inBattle && selected.A && opponent) {
     return (
       <main className={`${styles.battlePage} phone-shell`}>
         <header className={styles.arenaHeader}>
@@ -214,7 +306,7 @@ export default function BattleGame() {
         <BattleCanvas
           key={matchKey}
           cardA={selected.A}
-          cardB={selected.B}
+          cardB={opponent}
           onComplete={setResult}
         />
 
@@ -223,12 +315,12 @@ export default function BattleGame() {
             <section className={styles.resultPanel}>
               <div className={styles.crown} aria-hidden="true">♛</div>
               <p className={styles.eyebrow}>MATCH WINNER</p>
-              <h2 id="result-title">{winner.class.nameEn}</h2>
-              <p className={styles.classSubtitle} lang="zh-Hant">{winner.class.name}</p>
+              <h2 id="result-title">{cardNameEn(winner)}</h2>
+              <p className={styles.classSubtitle} lang="zh-Hant">{cardName(winner)}</p>
               <div className={styles.winnerMascot}>
                 <Image
                   src={CLASS_ASSETS[winner.class.key]}
-                  alt={`${winner.class.nameEn} victory pose`}
+                  alt={`${cardNameEn(winner)} victory pose`}
                   fill
                   sizes="180px"
                 />
@@ -237,7 +329,7 @@ export default function BattleGame() {
                 {result.score.A} <span>—</span> {result.score.B}
               </p>
               <div className={styles.roastBubble} lang="zh-Hant">
-                <strong>魔鏡給 {loser.class.name}：</strong>
+                <strong>魔鏡給 {cardName(loser)}：</strong>
                 <p>「{loserRoast}」</p>
               </div>
               <div className={styles.resultActions}>
@@ -266,17 +358,75 @@ export default function BattleGame() {
           <p>FACEFORGE BATTLE</p>
           <h1>Choose Fighters</h1>
         </div>
-        <span className={styles.step}>P{activePlayer === "A" ? "1" : "2"}/2</span>
+        <span className={styles.step}>
+          {mode === "quick" ? "SOLO" : `P${activePlayer === "A" ? "1" : "2"}/2`}
+        </span>
       </header>
 
+      <BattleModePicker mode={mode} onChange={chooseMode} />
+
       <section className={styles.introCopy}>
-        <p className={styles.eyebrow}>{playerLabel(activePlayer).toUpperCase()} IS CHOOSING</p>
-        <h2>Pick your face-born hero</h2>
-        <p>選一張卡，屬性公開後用讀心術搶下兩勝。</p>
+        <p className={styles.eyebrow}>
+          {mode === "quick"
+            ? "QUICK MATCH · SOLO"
+            : `${playerLabel(activePlayer).toUpperCase()} IS CHOOSING`}
+        </p>
+        <h2>{mode === "quick" ? "Pick your hero and rival" : "Pick your face-born hero"}</h2>
+        <p>
+          {mode === "quick"
+            ? "選你的臉鬥士，再挑戰見習生或鬼臉宗師。"
+            : "選一張卡，屬性公開後用讀心術搶下兩勝。"}
+        </p>
       </section>
 
       <section className={styles.slots} aria-label="Selected battle cards">
-        {(["A", "B"] as const).map((player) => {
+        {mode === "quick" ? (
+          <>
+            <button
+              type="button"
+              className={`${styles.slot} ${styles.activeSlot}`}
+              aria-label={selected.A ? `Your slot, ${selected.A.class.nameEn}` : "Your slot, empty"}
+            >
+              <span className={styles.slotPlayer}>YOU</span>
+              {selected.A ? (
+                <>
+                  <span className={styles.slotImage}>
+                    <Image
+                      src={CLASS_ASSETS[selected.A.class.key]}
+                      alt=""
+                      fill
+                      sizes="150px"
+                    />
+                  </span>
+                  <strong>{selected.A.class.nameEn}</strong>
+                  <small lang="zh-Hant">{selected.A.class.name}</small>
+                </>
+              ) : (
+                <>
+                  <span className={styles.slotQuestion} aria-hidden="true">?</span>
+                  <strong>Choose Hero</strong>
+                  <small>選擇你的卡</small>
+                </>
+              )}
+            </button>
+            <div
+              className={`${styles.slot} ${styles.npcSlot}`}
+              aria-label={`NPC opponent, ${selectedNpc.nameEn}`}
+            >
+              <span className={styles.slotPlayer}>NPC</span>
+              <span className={styles.slotImage}>
+                <Image
+                  src={CLASS_ASSETS[selectedNpc.class.key]}
+                  alt=""
+                  fill
+                  sizes="150px"
+                />
+              </span>
+              <strong>{selectedNpc.nameEn}</strong>
+              <small lang="zh-Hant">{selectedNpc.name}</small>
+            </div>
+          </>
+        ) : (["A", "B"] as const).map((player) => {
           const card = selected[player];
           const isActive = activePlayer === player;
           return (
@@ -318,13 +468,16 @@ export default function BattleGame() {
         <div className={styles.sectionHeading}>
           <div>
             <p className={styles.eyebrow}>COLLECTION</p>
-            <h2 id="roster-title">Choose for {playerLabel(activePlayer)}</h2>
+            <h2 id="roster-title">
+              {mode === "quick" ? "Choose your hero" : `Choose for ${playerLabel(activePlayer)}`}
+            </h2>
           </div>
           <span>{collection.length} cards</span>
         </div>
         <div className={styles.cardGrid}>
           {collection.map((card) => {
-            const chosen = selected[activePlayer]?.id === card.id;
+            const choosingPlayer = mode === "quick" ? "A" : activePlayer;
+            const chosen = selected[choosingPlayer]?.id === card.id;
             return (
               <button
                 type="button"
@@ -357,9 +510,53 @@ export default function BattleGame() {
         </div>
       </section>
 
+      {mode === "quick" && (
+        <section className={styles.npcPanel} aria-labelledby="npc-title">
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>NPC OPPONENT</p>
+              <h2 id="npc-title">Choose your challenge</h2>
+            </div>
+            <span>Auto-play</span>
+          </div>
+          <div className={styles.npcGrid}>
+            {NPC_PRESETS.map((npc) => {
+              const chosen = selectedNpc.id === npc.id;
+              return (
+                <button
+                  type="button"
+                  key={npc.id}
+                  className={`${styles.npcChoice} ${chosen ? styles.chosenNpc : ""}`}
+                  onClick={() => chooseNpc(npc)}
+                  aria-pressed={chosen}
+                >
+                  <span className={styles.npcImage}>
+                    <Image
+                      src={CLASS_ASSETS[npc.class.key]}
+                      alt=""
+                      fill
+                      sizes="90px"
+                    />
+                  </span>
+                  <span>
+                    <strong>{npc.nameEn}</strong>
+                    <small lang="zh-Hant">{npc.name}</small>
+                    <i>
+                      {npc.npcStrategy === "apprentice"
+                        ? "Random picks · 入門"
+                        : "Greedy picks · 魔王"}
+                    </i>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <div className={styles.selectionActions}>
         <Link
-          href={`/draw?returnTo=battle&player=${activePlayer}`}
+          href={`/draw?returnTo=battle&mode=${mode}&player=${mode === "quick" ? "A" : activePlayer}`}
           className="sticker-button sticker-button-secondary"
         >
           <span>Draw New</span>
@@ -369,14 +566,26 @@ export default function BattleGame() {
           type="button"
           className="sticker-button sticker-button-primary"
           onClick={lockCard}
-          disabled={!selected[activePlayer]}
+          disabled={!selected[mode === "quick" ? "A" : activePlayer]}
         >
-          <span>{activePlayer === "A" ? "Lock P1 Card" : "Enter Arena"}</span>
-          <small>{activePlayer === "A" ? "鎖定並交機" : "開始對戰"}</small>
+          <span>
+            {mode === "quick"
+              ? "Enter Arena"
+              : activePlayer === "A"
+                ? "Lock P1 Card"
+                : "Enter Arena"}
+          </span>
+          <small>
+            {mode === "quick"
+              ? "開始快速對戰"
+              : activePlayer === "A"
+                ? "鎖定並交機"
+                : "開始對戰"}
+          </small>
         </button>
       </div>
 
-      {handoff && (
+      {mode === "twoPlayers" && handoff && (
         <div className={styles.handoff} role="dialog" aria-modal="true" aria-labelledby="handoff-title">
           <p className={styles.eyebrow}>PLAYER 1 LOCKED IN</p>
           <div className={styles.handoffIcon} aria-hidden="true">↝</div>
