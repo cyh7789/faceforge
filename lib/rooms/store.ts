@@ -102,7 +102,7 @@ export class InMemoryRoomStore implements RoomStore {
   private readonly randomToken: () => string;
 
   constructor(options: InMemoryRoomStoreOptions = {}) {
-    this.now = options.now ?? Date.now;
+    this.now = options.now ?? (() => Date.now());
     this.randomCode =
       options.randomCode ??
       (() => String(1_000 + Math.floor(Math.random() * 9_000)));
@@ -239,5 +239,9 @@ export class InMemoryRoomStore implements RoomStore {
       }
     }
     return expired;
+  }
+
+  clear(): void {
+    this.rooms.clear();
   }
 }
