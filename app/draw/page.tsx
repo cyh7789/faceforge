@@ -36,6 +36,15 @@ type FaceDetectorConstructor = new (options?: {
   maxDetectedFaces?: number;
 }) => FaceDetectorLike;
 
+function battleReturnQuery(search: string): string {
+  const params = new URLSearchParams(search);
+  if (params.get("returnTo") !== "battle") {
+    return "";
+  }
+  const player = params.get("player") === "B" ? "B" : "A";
+  return `?returnTo=battle&player=${player}`;
+}
+
 async function downscaleToJpeg(blob: Blob): Promise<string> {
   const sourceUrl = URL.createObjectURL(blob);
   const image = new window.Image();
@@ -240,7 +249,7 @@ export default function DrawCameraPage() {
     try {
       const image = await downscaleToJpeg(shot.blob);
       sessionStorage.setItem(PENDING_DRAW_STORAGE_KEY, image);
-      router.push("/draw/reveal");
+      router.push(`/draw/reveal${battleReturnQuery(window.location.search)}`);
     } catch {
       setCaptureError("We could not read that image. Try another photo.");
       setSubmitting(false);

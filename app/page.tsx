@@ -187,7 +187,7 @@ export default function CollectionHome() {
         </Link>
         <Link href="/battle" className="sticker-button sticker-button-secondary">
           <span className="text-lg">Battle</span>
-          <small>Coming soon</small>
+          <small>Same-device BO3</small>
         </Link>
       </nav>
 

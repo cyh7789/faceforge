@@ -205,7 +205,7 @@ describe("battleReducer", () => {
     state = pickA(state, "mp");
     state = pickB(state, "grit");
     state = pickA(state, "grit");
-    state = pickB(state, "hp");
+    state = pickB(state, "luk");
 
     expect(state).toMatchObject({
       phase: "complete",
