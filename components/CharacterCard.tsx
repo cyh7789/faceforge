@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import { CLASS_ASSETS } from "@/lib/engine/assets";
 import type { Card, StatKey } from "@/lib/engine/types";
 
+import { ConstellationCardBack } from "./ConstellationCardBack";
 import styles from "./CharacterCard.module.css";
 
 const STATS: readonly { key: StatKey; label: string }[] = [
@@ -53,17 +54,7 @@ export function CharacterCard({
       >
         <span className={`${styles.inner} ${flipped ? styles.flipped : ""}`}>
           <span className={`${styles.face} ${styles.back}`} aria-hidden={flipped}>
-            <span className={styles.backMoon}>☾</span>
-            <span className={styles.backTitle}>FACEFORGE</span>
-            <span className={styles.constellation} aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className={styles.backSubtitle}>A face written in the stars</span>
+            <ConstellationCardBack card={card} />
           </span>
 
           <span className={`${styles.face} ${styles.front}`} aria-hidden={!flipped}>

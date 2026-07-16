@@ -42,4 +42,21 @@ describe("OnlineRoomControls", () => {
     expect(html).toContain("Room not found");
     expect(html.match(/disabled=""/g)).toHaveLength(2);
   });
+
+  it("offers an explicit new-room recovery action after a join error", () => {
+    const html = renderToStaticMarkup(
+      createElement(OnlineRoomControls, {
+        card: APPRENTICE_MOCHI,
+        joinCode: "9999",
+        pending: false,
+        error: "找不到房間 · Room not found",
+        onJoinCodeChange: vi.fn(),
+        onCreate: vi.fn(),
+        onJoin: vi.fn(),
+      }),
+    );
+
+    expect(html).toContain("找不到房間 · Room not found");
+    expect(html).toContain("建立新房 · Create New Room");
+  });
 });

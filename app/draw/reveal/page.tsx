@@ -8,10 +8,15 @@ import {
   battleDestination,
   battleReturnQuery,
 } from "@/lib/battle-navigation";
+import { downloadCardImage } from "@/lib/card-image";
 import { addCard, COLLECTION_STORAGE_KEY } from "@/lib/collection";
 import { PENDING_DRAW_STORAGE_KEY } from "@/lib/draw-session";
 import type { Card, Rarity } from "@/lib/engine/types";
 
+import {
+  RevealErrorPanel,
+  type AnalyzeErrorCode,
+} from "./RevealErrorPanel";
 import styles from "./reveal.module.css";
 
 const LOADING_LINES = [
@@ -20,43 +25,6 @@ const LOADING_LINES = [
   "召喚臉部命運… Summoning your face-born fate…",
   "衡量怪力波動… Measuring strange energy…",
 ] as const;
-
-type AnalyzeErrorCode =
-  | "face_too_small"
-  | "no_face"
-  | "file_too_large"
-  | "upstream_error"
-  | "missing_photo";
-
-const ERROR_COPY: Readonly<
-  Record<AnalyzeErrorCode, { title: string; subtitle: string; detail: string }>
-> = {
-  face_too_small: {
-    title: "Get closer!",
-    subtitle: "臉再靠近一點！",
-    detail: "Fill the oval with your face, then try the ritual again.",
-  },
-  no_face: {
-    title: "No face found!",
-    subtitle: "魔鏡找不到臉！",
-    detail: "Keep one uncovered face centered in the frame.",
-  },
-  file_too_large: {
-    title: "That portrait is too mighty!",
-    subtitle: "照片太大張了！",
-    detail: "Choose a smaller photo or take a new one.",
-  },
-  upstream_error: {
-    title: "The mirror went cloudy!",
-    subtitle: "魔鏡暫時看不清楚！",
-    detail: "Your photo is still here. Retry, or take another one.",
-  },
-  missing_photo: {
-    title: "No portrait is waiting",
-    subtitle: "還沒有照片可以占卜！",
-    detail: "Return to the draw station and capture your face first.",
-  },
-};
 
 const GLOW_CLASS: Readonly<Record<Rarity, string>> = {
   common: styles.commonGlow,
@@ -75,19 +43,6 @@ function readStoredCollection(): Card[] {
   } catch {
     return [];
   }
-}
-
-async function waitForImages(node: HTMLElement): Promise<void> {
-  const pending = Array.from(node.querySelectorAll("img"))
-    .filter((image) => !image.complete)
-    .map(
-      (image) =>
-        new Promise<void>((resolve) => {
-          image.addEventListener("load", () => resolve(), { once: true });
-          image.addEventListener("error", () => resolve(), { once: true });
-        }),
-    );
-  await Promise.all(pending);
 }
 
 export default function RevealPage() {
@@ -198,60 +153,16 @@ export default function RevealPage() {
     setSavingImage(true);
     setActionError(undefined);
     try {
-      await waitForImages(cardCaptureRef.current);
-      await document.fonts.ready;
-      const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(cardCaptureRef.current, {
-        backgroundColor: "#fff6df",
-        cacheBust: true,
-        pixelRatio: 2,
-      });
-      const download = document.createElement("a");
-      download.href = dataUrl;
-      download.download = `${card.id}-${card.class.key}.png`;
-      download.click();
+      await downloadCardImage(cardCaptureRef.current, card);
     } catch {
-      setActionError("The card image could not be saved. Please try again.");
+      setActionError("卡片圖片存不下來 · Could not save the card image. 請再試一次。");
     } finally {
       setSavingImage(false);
     }
   }
 
   if (errorCode) {
-    const copy = ERROR_COPY[errorCode];
-    return (
-      <main className="phone-shell flex min-h-dvh flex-col items-center justify-center px-5 pb-[calc(28px+env(safe-area-inset-bottom))] pt-[calc(28px+env(safe-area-inset-top))] text-center">
-        <section className="sticker-panel w-full px-6 py-9" role="alert">
-          <div className={styles.errorMirror} aria-hidden="true">?</div>
-          <p className="text-xs font-black tracking-[0.2em] text-ff-error">RITUAL INTERRUPTED</p>
-          <h1 className="mt-2 text-3xl font-black text-ff-ink">{copy.title}</h1>
-          <p className="mt-1 text-xl font-black text-ff-pink-deep" lang="zh-Hant">
-            {copy.subtitle}
-          </p>
-          <p className="mx-auto mt-4 max-w-xs text-sm font-bold leading-relaxed text-ff-plum">
-            {copy.detail}
-          </p>
-          <div className="mt-7 grid gap-3">
-            {errorCode === "upstream_error" && (
-              <button
-                type="button"
-                onClick={retry}
-                className="sticker-button sticker-button-primary"
-              >
-                Retry Ritual
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={retake}
-              className="sticker-button sticker-button-secondary"
-            >
-              Retake Photo
-            </button>
-          </div>
-        </section>
-      </main>
-    );
+    return <RevealErrorPanel code={errorCode} onRetry={retry} onRetake={retake} />;
   }
 
   if (!card) {
@@ -335,14 +246,14 @@ export default function RevealPage() {
             className="sticker-button sticker-button-secondary"
             onClick={() => setFlipped(false)}
           >
-            View Card Back
+            看卡背 · View Card Back
           </button>
           <button
             type="button"
             className="sticker-button sticker-button-primary"
             onClick={saveToCollection}
           >
-            Save to Collection
+            收進圖鑑 · Save to Collection
           </button>
           <button
             type="button"
@@ -350,7 +261,7 @@ export default function RevealPage() {
             onClick={saveCardImage}
             disabled={savingImage}
           >
-            {savingImage ? "Saving Image…" : "Save Card Image"}
+            {savingImage ? "儲存中 · Saving…" : "儲存卡片圖片 · Save Card Image"}
           </button>
         </section>
       )}

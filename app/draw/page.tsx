@@ -14,6 +14,7 @@ import {
   type LocalFaceDetector,
 } from "@/lib/faceDetect";
 
+import { DetectorLoadingPanel } from "./DetectorLoadingPanel";
 import styles from "./draw.module.css";
 
 const HINTS = [
@@ -21,6 +22,8 @@ const HINTS = [
   "The stranger, the rarer! 越怪越稀有！",
   "Face powers only! 只能用臉！",
 ] as const;
+
+const DETECTOR_SKIP_DELAY_MS = 8_000;
 
 type CameraStatus = "starting" | "ready" | "error";
 type DetectorStatus = "loading" | "ready" | "degraded";
@@ -67,10 +70,12 @@ export default function DrawCameraPage() {
   const detectorRef = useRef<LocalFaceDetector | undefined>(undefined);
   const detectorPromiseRef = useRef<Promise<LocalFaceDetector> | undefined>(undefined);
   const detectorStatusRef = useRef<DetectorStatus>("loading");
+  const detectorSkippedRef = useRef(false);
   const shotActiveRef = useRef(false);
   const uploadRequestRef = useRef(0);
   const [cameraStatus, setCameraStatus] = useState<CameraStatus>("starting");
   const [detectorStatus, setDetectorStatus] = useState<DetectorStatus>("loading");
+  const [showDetectorSkip, setShowDetectorSkip] = useState(false);
   const [cameraGate, setCameraGate] = useState<FaceGateState>("no-face");
   const [hintIndex, setHintIndex] = useState(0);
   const [shot, setShot] = useState<Shot>();
@@ -89,12 +94,16 @@ export default function DrawCameraPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const skipTimer = window.setTimeout(
+      () => setShowDetectorSkip(true),
+      DETECTOR_SKIP_DELAY_MS,
+    );
 
     const detectorPromise = createLocalFaceDetector();
     detectorPromiseRef.current = detectorPromise;
     detectorPromise
       .then((detector) => {
-        if (cancelled) {
+        if (cancelled || detectorSkippedRef.current) {
           detector.close();
           return;
         }
@@ -103,7 +112,7 @@ export default function DrawCameraPage() {
         setDetectorStatus("ready");
       })
       .catch(() => {
-        if (!cancelled) {
+        if (!cancelled && !detectorSkippedRef.current) {
           detectorStatusRef.current = "degraded";
           setDetectorStatus("degraded");
           setCameraGate("degraded");
@@ -112,6 +121,7 @@ export default function DrawCameraPage() {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(skipTimer);
       detectorRef.current?.close();
       detectorRef.current = undefined;
     };
@@ -218,6 +228,16 @@ export default function DrawCameraPage() {
     };
   }, [cameraStatus, detectorStatus]);
 
+  function skipDetection() {
+    detectorSkippedRef.current = true;
+    detectorStatusRef.current = "degraded";
+    detectorRef.current?.close();
+    detectorRef.current = undefined;
+    setDetectorStatus("degraded");
+    setCameraGate("degraded");
+    setShowDetectorSkip(false);
+  }
+
   function setCapturedShot(blob: Blob, source: Shot["source"]): string {
     if (shotUrlRef.current) {
       URL.revokeObjectURL(shotUrlRef.current);
@@ -310,7 +330,9 @@ export default function DrawCameraPage() {
       });
       setShotGate(gate);
       if (gate === "no-face") {
-        setCaptureError("這張沒有臉喔 No face detected");
+        setCaptureError(
+          "這張照片找不到臉 · No face detected. 請換一張有臉的照片再試。",
+        );
       }
     } catch {
       detectorStatusRef.current = "degraded";
@@ -414,10 +436,10 @@ export default function DrawCameraPage() {
               {uploadChecking
                 ? "確認照片中 Checking for a face…"
                 : shotGate === "good"
-                  ? "找到臉了 Face detected"
+                  ? "找到臉了 · Face detected"
                   : shotGate === "degraded"
                     ? "臉部偵測暫時不可用 · Face check unavailable"
-                    : "請換一張有臉的照片 Choose another photo"}
+                    : "這張找不到臉 · Choose another photo with a face"}
             </p>
           ) : (
             <p className="text-center text-sm font-bold text-ff-plum">
@@ -441,7 +463,7 @@ export default function DrawCameraPage() {
               disabled={submitting}
               className="sticker-button sticker-button-secondary"
             >
-              Retake
+              {shot.source === "upload" ? "換一張 · Choose Another" : "重拍 · Retake"}
             </button>
             <button
               type="button"
@@ -453,7 +475,7 @@ export default function DrawCameraPage() {
                 ? "Checking…"
                 : submitting
                   ? "Preparing…"
-                  : "Consult Mirror"}
+                  : "問魔鏡 · Consult Mirror"}
             </button>
           </div>
         </section>
@@ -485,24 +507,30 @@ export default function DrawCameraPage() {
       </header>
 
       <section className={styles.guide} aria-label="Face positioning guide">
-        <div
-          className={`${styles.oval} ${
-            guideTone === "ready"
-              ? styles.ovalReady
-              : guideTone === "waiting"
-                ? styles.ovalBlocked
-                : guideTone === "warning"
-                  ? styles.ovalWarning
-                  : styles.ovalStarting
-          }`}
-        />
-        <p className={styles.hint}>{HINTS[hintIndex]}</p>
-        <p
-          className={`${styles.badge} ${styles[guideTone]}`}
-          role="status"
-        >
-          {guideText}
-        </p>
+        {detectorStatus === "loading" ? (
+          <DetectorLoadingPanel
+            showSkip={showDetectorSkip}
+            onSkip={skipDetection}
+          />
+        ) : (
+          <>
+            <div
+              className={`${styles.oval} ${
+                guideTone === "ready"
+                  ? styles.ovalReady
+                  : guideTone === "waiting"
+                    ? styles.ovalBlocked
+                    : guideTone === "warning"
+                      ? styles.ovalWarning
+                      : styles.ovalStarting
+              }`}
+            />
+            <p className={styles.hint}>{HINTS[hintIndex]}</p>
+            <p className={`${styles.badge} ${styles[guideTone]}`} role="status">
+              {guideText}
+            </p>
+          </>
+        )}
       </section>
 
       <section className={styles.controls}>
@@ -513,7 +541,7 @@ export default function DrawCameraPage() {
         )}
         {cameraStatus === "error" && (
           <p className="mb-3 text-center text-sm font-bold text-ff-cream">
-            Camera unavailable. Choose a photo instead.
+            相機無法使用 · Camera unavailable. 請改從相簿選照片。
           </p>
         )}
         <button

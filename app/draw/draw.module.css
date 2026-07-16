@@ -58,6 +58,130 @@
   padding: 8px 20px;
 }
 
+.detectorLoading {
+  width: min(100%, 330px);
+  padding: 20px 18px;
+  border: 3px solid #fff6df;
+  border-radius: 24px;
+  background: rgb(63 41 79 / 92%);
+  box-shadow: 0 6px 0 #735080;
+  color: #fff6df;
+  text-align: center;
+}
+
+.loadingMirror {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  margin: 0 auto 12px;
+  border: 3px solid #fff6df;
+  border-radius: 50%;
+  background: #d8b4e7;
+  color: #735080;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.loadingMirror span {
+  transform: rotate(-12deg) translateY(-2px);
+}
+
+.loadingEyebrow {
+  color: #f2bfd1;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.detectorLoading h2 {
+  margin-top: 5px;
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1.18;
+}
+
+.detectorLoading h2 small {
+  display: block;
+  margin-top: 3px;
+  font-size: 14px;
+}
+
+.detectorProgress {
+  overflow: hidden;
+  height: 9px;
+  margin-top: 17px;
+  border: 2px solid #fff6df;
+  border-radius: 999px;
+  background: #4b3458;
+}
+
+.detectorProgress i {
+  display: block;
+  width: 48%;
+  height: 100%;
+  border-radius: inherit;
+  background: #f4cf83;
+  animation: detector-progress 1.35s ease-in-out infinite;
+  transform: translateX(-110%) scaleX(0.7);
+  transform-origin: left;
+}
+
+.detectorHint {
+  margin-top: 13px;
+  color: #fff6df;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.detectorHint small {
+  display: block;
+  color: #f2bfd1;
+  font-size: 10px;
+}
+
+.detectorEscape {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px dashed #b99ac6;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.detectorEscape button {
+  min-height: 44px;
+  margin-top: 9px;
+  padding: 9px 16px;
+  border: 2px solid #4b3458;
+  border-radius: 999px;
+  background: #fff6df;
+  box-shadow: 0 3px 0 #f2bfd1;
+  color: #4b3458;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.detectorEscape button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #f2bfd1;
+}
+
+@keyframes detector-progress {
+  0% {
+    transform: translateX(-110%) scaleX(0.7);
+  }
+
+  55% {
+    transform: translateX(85%) scaleX(1);
+  }
+
+  100% {
+    transform: translateX(230%) scaleX(0.65);
+  }
+}
+
 .oval {
   width: min(66vw, 272px);
   aspect-ratio: 0.76;

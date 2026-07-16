@@ -50,7 +50,16 @@ export function OnlineRoomControls({
       <p className={styles.onlineSelectedCard}>
         {cardName ? `Playing as ${cardName}` : "Pick your hero above first"}
       </p>
-      {error && <p className={styles.onlineLobbyError} role="alert">{error}</p>}
+      {error && (
+        <div className={styles.onlineLobbyError} role="alert">
+          <p>{error}</p>
+          {card && (
+            <button type="button" onClick={onCreate} disabled={pending}>
+              建立新房 · Create New Room
+            </button>
+          )}
+        </div>
+      )}
       <div className={styles.onlineLobbyActions}>
         <button type="button" onClick={onCreate} disabled={!card || pending}>
           <strong>Create Room</strong>
@@ -106,7 +115,7 @@ export default function OnlineRoomLobby({
       return;
     }
     if (kind === "join" && !/^\d{4}$/.test(joinCode)) {
-      setError("Enter a 4-digit room code.");
+      setError("房號要四位數 · Enter a 4-digit room code.");
       return;
     }
 
