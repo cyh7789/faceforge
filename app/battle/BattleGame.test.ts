@@ -8,7 +8,7 @@ import {
   APPRENTICE_MOCHI,
   GRIMACE_MASTER,
 } from "@/lib/engine/presets";
-import BattleGame from "./BattleGame";
+import BattleGame, { BattleModePicker } from "./BattleGame";
 
 vi.mock("next/dynamic", () => ({
   default: () => () => null,
@@ -72,5 +72,20 @@ describe("BattleGame result overlay", () => {
     expect(html).toContain("Rematch");
     expect(html).toContain("Change Cards");
     expect(html).toContain("Home · 回首頁");
+  });
+});
+
+describe("BattleGame mode picker", () => {
+  it("offers Online Room as the third battle mode", () => {
+    const html = renderToStaticMarkup(
+      createElement(BattleModePicker, {
+        mode: "online",
+        onChange: vi.fn(),
+      }),
+    );
+
+    expect(html).toContain("Online Room");
+    expect(html).toContain("兩支手機連線");
+    expect(html).toContain('aria-pressed="true"');
   });
 });
