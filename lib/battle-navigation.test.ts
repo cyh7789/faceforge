@@ -16,6 +16,7 @@ describe("battleModeFromSearch", () => {
     expect(battleModeFromSearch("?mode=twoPlayers&player=A")).toBe(
       "twoPlayers",
     );
+    expect(battleModeFromSearch("?mode=online&player=A")).toBe("online");
   });
 
   it("keeps legacy Player 2 draw returns in 2 Players mode", () => {
@@ -45,6 +46,17 @@ describe("battle draw navigation", () => {
     );
     expect(battleDestination(search, "ff-player-two")).toBe(
       "/battle?mode=twoPlayers&player=B&card=ff-player-two",
+    );
+  });
+
+  it("returns an Online Room card to the online lobby", () => {
+    const search = "?returnTo=battle&mode=online&player=A";
+
+    expect(battleReturnQuery(search)).toBe(
+      "?returnTo=battle&mode=online&player=A",
+    );
+    expect(battleDestination(search, "ff-online")).toBe(
+      "/battle?mode=online&player=A&card=ff-online",
     );
   });
 
