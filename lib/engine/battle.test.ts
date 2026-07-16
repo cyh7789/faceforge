@@ -70,6 +70,15 @@ function pickB(state: ReturnType<typeof createBattleState>, pick: keyof Stats) {
   return battleReducer(state, { type: "pick", player: "B", pick });
 }
 
+function playAllMatchingStats(cardA: Card, cardB: Card) {
+  let state = createBattleState(cardA, cardB);
+  for (const stat of BATTLE_STATS) {
+    state = pickA(state, stat);
+    state = pickB(state, stat);
+  }
+  return state;
+}
+
 describe("resolveTurn", () => {
   it("returns player A and both values when A's picked value is higher", () => {
     expect(
@@ -213,6 +222,117 @@ describe("battleReducer", () => {
       winner: "B",
     });
     expect(state.rounds.map(({ winner }) => winner)).toEqual(["A", "B", "B"]);
+  });
+
+  it("completes instead of entering an empty pick phase after four ties and a 1:1 split", () => {
+    const cardA = card("soft-lock-A", {
+      hp: 90,
+      mp: 10,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+    const cardB = card("soft-lock-B", {
+      hp: 80,
+      mp: 30,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+
+    const state = playAllMatchingStats(cardA, cardB);
+
+    expect(state).toMatchObject({
+      phase: "complete",
+      score: { A: 1, B: 1 },
+      winner: "B",
+    });
+    expect(getAvailableStats(state, "A")).toEqual([]);
+    expect(getAvailableStats(state, "B")).toEqual([]);
+    expect(() => pickA(state, "hp")).toThrowError("Battle is complete");
+  });
+
+  it("uses the higher score when both players exhaust their stats below two wins", () => {
+    const cardA = card("score-A", {
+      hp: 51,
+      mp: 50,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+    const cardB = card("score-B", {
+      hp: 50,
+      mp: 50,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+
+    const state = playAllMatchingStats(cardA, cardB);
+
+    expect(state).toMatchObject({
+      phase: "complete",
+      score: { A: 1, B: 0 },
+      winner: "A",
+    });
+  });
+
+  it("uses the higher six-stat card sum when exhausted scores are equal", () => {
+    const cardA = card("sum-A", {
+      hp: 51,
+      mp: 45,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+    const cardB = card("sum-B", {
+      hp: 50,
+      mp: 50,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+
+    const state = playAllMatchingStats(cardA, cardB);
+
+    expect(state).toMatchObject({
+      phase: "complete",
+      score: { A: 1, B: 1 },
+      winner: "B",
+    });
+  });
+
+  it("declares a draw when exhausted scores and six-stat card sums are equal", () => {
+    const cardA = card("draw-A", {
+      hp: 55,
+      mp: 45,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+    const cardB = card("draw-B", {
+      hp: 50,
+      mp: 50,
+      def: 50,
+      agi: 50,
+      luk: 50,
+      grit: 50,
+    });
+
+    const state = playAllMatchingStats(cardA, cardB);
+
+    expect(state).toMatchObject({
+      phase: "complete",
+      score: { A: 1, B: 1 },
+      winner: "draw",
+    });
   });
 
   it("rejects further input after the match is complete", () => {
