@@ -19,6 +19,7 @@
 
 # production
 /build
+/public/mediapipe/wasm/
 
 # misc
 .DS_Store
