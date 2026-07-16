@@ -71,7 +71,7 @@
 
 .modePicker {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   margin-top: 18px;
   padding: 5px;
   gap: 6px;
@@ -175,6 +175,19 @@
 .npcSlot {
   border-style: solid;
   background: var(--color-ff-lavender-soft);
+}
+
+.onlineRoomSlot {
+  border-style: solid;
+  background: linear-gradient(145deg, var(--color-ff-lavender-soft), #fff);
+}
+
+.roomSlotCode {
+  margin: 18px 0 12px;
+  color: var(--color-ff-pink-deep);
+  font-size: 31px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
 }
 
 .slot:disabled:not(.activeSlot) {
@@ -434,6 +447,10 @@
   opacity: 0.48;
 }
 
+.onlineDrawAction {
+  grid-template-columns: 1fr;
+}
+
 .handoff,
 .resultBackdrop {
   position: fixed;
@@ -675,6 +692,108 @@
   color: var(--color-ff-plum);
   font-size: 12px;
   font-weight: 950;
+}
+
+.onlineLobbyPanel {
+  margin-top: 15px;
+  padding: 15px;
+  border: 3px solid var(--color-ff-plum);
+  border-radius: 24px;
+  background: rgb(232 220 246 / 88%);
+  box-shadow: 0 6px 0 var(--color-ff-plum);
+}
+
+.onlineSelectedCard {
+  margin: 10px 0 0;
+  color: var(--color-ff-plum);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.onlineLobbyError {
+  margin: 9px 0 0;
+  padding: 8px 10px;
+  border: 2px solid var(--color-ff-pink-deep);
+  border-radius: 12px;
+  background: var(--color-ff-pink);
+  color: var(--color-ff-ink);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.onlineLobbyActions {
+  display: grid;
+  grid-template-columns: 1fr 28px 1fr;
+  align-items: stretch;
+  margin-top: 12px;
+  gap: 7px;
+}
+
+.onlineLobbyActions > span {
+  align-self: center;
+  color: var(--color-ff-plum);
+  font-size: 9px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.onlineLobbyActions > button,
+.onlineLobbyActions > div > button {
+  display: flex;
+  min-height: 62px;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-ff-plum);
+  border-radius: 14px;
+  background: var(--color-ff-gold-soft);
+  color: var(--color-ff-ink);
+  box-shadow: 0 3px 0 var(--color-ff-plum);
+}
+
+.onlineLobbyActions button:disabled {
+  box-shadow: none;
+  filter: grayscale(0.7);
+  opacity: 0.48;
+}
+
+.onlineLobbyActions button strong {
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.onlineLobbyActions button small {
+  margin-top: 2px;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.onlineLobbyActions > div {
+  display: grid;
+  grid-template-rows: auto 44px 1fr;
+  gap: 5px;
+}
+
+.onlineLobbyActions label {
+  color: var(--color-ff-plum);
+  font-size: 8px;
+  font-weight: 950;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.onlineLobbyActions input {
+  min-width: 0;
+  width: 100%;
+  border: 2px solid var(--color-ff-plum);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--color-ff-ink);
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  text-align: center;
 }
 
 .onlineError {
