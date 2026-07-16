@@ -651,6 +651,11 @@
   line-height: 1.5;
 }
 
+.drawRoasts {
+  display: grid;
+  gap: 10px;
+}
+
 .resultActions {
   display: grid;
   grid-template-columns: 1fr 1fr;

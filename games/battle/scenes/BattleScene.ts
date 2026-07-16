@@ -4,6 +4,7 @@ import { CLASS_ASSETS } from "@/lib/engine/assets";
 import type {
   BattlePlayer,
   BattleRound,
+  BattleWinner,
 } from "@/lib/engine/battle";
 import type { NpcStrategy } from "@/lib/engine/npc";
 import { isPresetCard } from "@/lib/engine/presets";
@@ -299,6 +300,10 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private renderPickPhase(player: BattlePlayer) {
+    if (gameState.match.phase === "complete") {
+      this.playBattleResult(gameState.match.winner);
+      return;
+    }
     this.clearTransientObjects();
     this.availablePicks = gameState.available(player);
     this.awaitingPass = false;
@@ -651,8 +656,20 @@ export class BattleScene extends Phaser.Scene {
   private finishReveal(round: BattleRound) {
     this.updateScorePips();
     if (round.winner === "tie") {
-      this.showRoundBanner("TIE — PICK AGAIN\n平手，雙方重選", COLORS.LAVENDER);
-      this.delay(() => this.renderPickPhase("A"), TIMING.TIE_HOLD, true);
+      const battleComplete = gameState.match.phase === "complete";
+      this.showRoundBanner(
+        battleComplete
+          ? "FINAL TIE — MATCH DECISION\n最終平手，結算勝負"
+          : "TIE — PICK AGAIN\n平手，雙方重選",
+        COLORS.LAVENDER,
+      );
+      this.delay(() => {
+        if (gameState.match.phase === "complete") {
+          this.playBattleResult(gameState.match.winner);
+        } else {
+          this.renderPickPhase("A");
+        }
+      }, TIMING.TIE_HOLD, true);
       return;
     }
 
@@ -663,7 +680,7 @@ export class BattleScene extends Phaser.Scene {
     );
     this.delay(() => {
       if (gameState.match.phase === "complete") {
-        this.playVictory(gameState.match.winner as BattlePlayer);
+        this.playBattleResult(gameState.match.winner);
       } else {
         this.renderPickPhase("A");
       }
@@ -793,6 +810,34 @@ export class BattleScene extends Phaser.Scene {
     this.transientObjects.push(background, text);
   }
 
+  private playBattleResult(winner: BattleWinner | null) {
+    if (winner === "draw") {
+      this.playDraw();
+    } else if (winner) {
+      this.playVictory(winner);
+    }
+  }
+
+  private playDraw() {
+    this.clearTransientObjects();
+    this.availablePicks = [];
+    this.updateScorePips();
+    this.busy = true;
+
+    const copy = this.add
+      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y + 55, "MATCH DRAW!\n雙方平手", {
+        align: "center",
+        color: "#3f294f",
+        fontFamily: TEXT_STYLE.FONT,
+        fontSize: "26px",
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5)
+      .setDepth(25);
+    this.transientObjects.push(copy);
+    this.scheduleBattleComplete();
+  }
+
   private playVictory(winner: BattlePlayer) {
     this.clearTransientObjects();
     this.updateScorePips();
@@ -834,6 +879,10 @@ export class BattleScene extends Phaser.Scene {
       this.spawnConfetti();
     }
     EventBus.emit(Events.SPECTACLE_VICTORY, { winner });
+    this.scheduleBattleComplete();
+  }
+
+  private scheduleBattleComplete() {
     this.delay(
       () => EventBus.emit(Events.BATTLE_COMPLETE, gameState.match),
       TIMING.VICTORY_HOLD,

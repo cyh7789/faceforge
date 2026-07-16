@@ -179,9 +179,13 @@ export default function BattleGame() {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  const winner = result?.winner ? result.cards[result.winner] : undefined;
-  const loser = result?.winner
-    ? result.cards[result.winner === "A" ? "B" : "A"]
+  const winnerPlayer =
+    result?.winner === "A" || result?.winner === "B"
+      ? result.winner
+      : undefined;
+  const winner = result && winnerPlayer ? result.cards[winnerPlayer] : undefined;
+  const loser = result && winnerPlayer
+    ? result.cards[winnerPlayer === "A" ? "B" : "A"]
     : undefined;
   const loserRoast = useMemo(
     () =>
@@ -189,6 +193,23 @@ export default function BattleGame() {
         ? pickRoast(loser.class.key, `${loser.id}-battle`, loser.curse)
         : "",
     [loser],
+  );
+  const drawRoasts = useMemo(
+    () =>
+      result?.winner === "draw"
+        ? (["A", "B"] as const).map((player) => {
+            const card = result.cards[player];
+            return {
+              card,
+              roast: pickRoast(
+                card.class.key,
+                `${card.id}-battle`,
+                card.curse,
+              ),
+            };
+          })
+        : [],
+    [result],
   );
 
   const opponent = mode === "quick" ? selectedNpc : selected.B;
@@ -311,28 +332,52 @@ export default function BattleGame() {
           onComplete={setResult}
         />
 
-        {result && winner && loser && (
+        {result && result.winner && (
           <div className={styles.resultBackdrop} role="dialog" aria-modal="true" aria-labelledby="result-title">
             <section className={styles.resultPanel}>
-              <div className={styles.crown} aria-hidden="true">♛</div>
-              <p className={styles.eyebrow}>MATCH WINNER</p>
-              <h2 id="result-title">{cardNameEn(winner)}</h2>
-              <p className={styles.classSubtitle} lang="zh-Hant">{cardName(winner)}</p>
-              <div className={styles.winnerMascot}>
-                <Image
-                  src={CLASS_ASSETS[winner.class.key]}
-                  alt={`${cardNameEn(winner)} victory pose`}
-                  fill
-                  sizes="180px"
-                />
-              </div>
+              {result.winner === "draw" ? (
+                <>
+                  <div className={styles.crown} aria-hidden="true">≈</div>
+                  <p className={styles.eyebrow}>MATCH DRAW</p>
+                  <h2 id="result-title">Draw!</h2>
+                  <p className={styles.classSubtitle} lang="zh-Hant">
+                    雙方都逃不過魔鏡
+                  </p>
+                </>
+              ) : winner && loser ? (
+                <>
+                  <div className={styles.crown} aria-hidden="true">♛</div>
+                  <p className={styles.eyebrow}>MATCH WINNER</p>
+                  <h2 id="result-title">{cardNameEn(winner)}</h2>
+                  <p className={styles.classSubtitle} lang="zh-Hant">{cardName(winner)}</p>
+                  <div className={styles.winnerMascot}>
+                    <Image
+                      src={CLASS_ASSETS[winner.class.key]}
+                      alt={`${cardNameEn(winner)} victory pose`}
+                      fill
+                      sizes="180px"
+                    />
+                  </div>
+                </>
+              ) : null}
               <p className={styles.finalScore}>
                 {result.score.A} <span>—</span> {result.score.B}
               </p>
-              <div className={styles.roastBubble} lang="zh-Hant">
-                <strong>魔鏡給 {cardName(loser)}：</strong>
-                <p>「{loserRoast}」</p>
-              </div>
+              {result.winner === "draw" ? (
+                <div className={styles.drawRoasts}>
+                  {drawRoasts.map(({ card, roast }) => (
+                    <div key={card.id} className={styles.roastBubble} lang="zh-Hant">
+                      <strong>魔鏡給 {cardName(card)}：</strong>
+                      <p>「{roast}」</p>
+                    </div>
+                  ))}
+                </div>
+              ) : loser ? (
+                <div className={styles.roastBubble} lang="zh-Hant">
+                  <strong>魔鏡給 {cardName(loser)}：</strong>
+                  <p>「{loserRoast}」</p>
+                </div>
+              ) : null}
               <div className={styles.resultActions}>
                 <button type="button" onClick={rematch} className="sticker-button sticker-button-primary">
                   <span>Rematch</span>

@@ -11,6 +11,7 @@ export const BATTLE_STATS: readonly StatKey[] = [
 
 export type BattlePlayer = "A" | "B";
 export type BattleRoundWinner = BattlePlayer | "tie";
+export type BattleWinner = BattlePlayer | "draw";
 export type BattlePhase = "pickA" | "pickB" | "complete";
 
 export interface TurnPick {
@@ -35,7 +36,7 @@ export interface BattleState {
   usedStats: Record<BattlePlayer, StatKey[]>;
   pendingPick: StatKey | null;
   rounds: BattleRound[];
-  winner: BattlePlayer | null;
+  winner: BattleWinner | null;
 }
 
 export type BattleAction = {
@@ -121,7 +122,37 @@ export function battleReducer(
     score[result.winner] += 1;
   }
 
-  const winner = score.A === 2 ? "A" : score.B === 2 ? "B" : null;
+  const usedStats = {
+    ...state.usedStats,
+    B: [...state.usedStats.B, action.pick],
+  };
+  let winner: BattleWinner | null =
+    score.A === 2 ? "A" : score.B === 2 ? "B" : null;
+  const statsExhausted = BATTLE_STATS.every(
+    (stat) => usedStats.A.includes(stat) && usedStats.B.includes(stat),
+  );
+  if (winner === null && statsExhausted) {
+    if (score.A !== score.B) {
+      winner = score.A > score.B ? "A" : "B";
+    } else {
+      const statSums = {
+        A: BATTLE_STATS.reduce(
+          (sum, stat) => sum + state.cards.A.stats[stat],
+          0,
+        ),
+        B: BATTLE_STATS.reduce(
+          (sum, stat) => sum + state.cards.B.stats[stat],
+          0,
+        ),
+      };
+      winner =
+        statSums.A === statSums.B
+          ? "draw"
+          : statSums.A > statSums.B
+            ? "A"
+            : "B";
+    }
+  }
   const round: BattleRound = {
     round: state.score.A + state.score.B + 1,
     picks: { A: state.pendingPick, B: action.pick },
@@ -132,10 +163,7 @@ export function battleReducer(
     ...state,
     phase: winner ? "complete" : "pickA",
     score,
-    usedStats: {
-      ...state.usedStats,
-      B: [...state.usedStats.B, action.pick],
-    },
+    usedStats,
     pendingPick: null,
     rounds: [...state.rounds, round],
     winner,
