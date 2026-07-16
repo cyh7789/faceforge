@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CharacterCard } from "@/components/CharacterCard";
+import { downloadCardImage } from "@/lib/card-image";
 import {
   bestCardForClass,
   COLLECTION_STORAGE_KEY,
@@ -47,10 +48,90 @@ function readCollection(): Card[] {
   }
 }
 
+interface CollectionCardDetailProps {
+  card: Card;
+  flipped: boolean;
+  savingImage: boolean;
+  actionError?: string;
+  onFlip: () => void;
+  onClose: () => void;
+  onSaveImage: (node: HTMLElement) => void;
+}
+
+export function CollectionCardDetail({
+  card,
+  flipped,
+  savingImage,
+  actionError,
+  onFlip,
+  onClose,
+  onSaveImage,
+}: CollectionCardDetailProps) {
+  const captureRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ff-ink/70 px-5 py-[calc(20px+env(safe-area-inset-top))] backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="detail-title"
+      onMouseDown={(event) => {
+        if (event.currentTarget === event.target) {
+          onClose();
+        }
+      }}
+    >
+      <section className="flex w-full max-w-[350px] flex-col items-center gap-3">
+        <div className="flex w-full items-center justify-between text-ff-cream">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.18em]">
+              COLLECTION CARD
+            </p>
+            <h2 id="detail-title" className="text-lg font-black">
+              {card.class.nameEn}
+            </h2>
+          </div>
+          <button
+            type="button"
+            autoFocus
+            className="min-h-11 rounded-full border-2 border-ff-cream bg-ff-plum px-4 text-sm font-black shadow-[0_3px_0_var(--color-ff-cream)]"
+            onClick={onClose}
+          >
+            Close · 關閉
+          </button>
+        </div>
+        <div ref={captureRef}>
+          <CharacterCard card={card} flipped={flipped} onFlip={onFlip} />
+        </div>
+        <p className="text-sm font-bold text-ff-cream">
+          Tap the card to flip · 點卡片翻面
+        </p>
+        <button
+          type="button"
+          className="sticker-button sticker-button-secondary w-full disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={savingImage}
+          onClick={() => captureRef.current && onSaveImage(captureRef.current)}
+        >
+          {savingImage
+            ? "Saving Image… · 圖片儲存中"
+            : "Save Card Image · 儲存卡片圖片"}
+        </button>
+        {actionError && (
+          <p className="w-full rounded-xl border-2 border-ff-error bg-white px-3 py-2 text-center text-sm font-bold text-ff-error" role="alert">
+            {actionError}
+          </p>
+        )}
+      </section>
+    </div>
+  );
+}
+
 export default function CollectionHome() {
   const [collection, setCollection] = useState<Card[]>([]);
   const [selected, setSelected] = useState<Card>();
   const [detailFlipped, setDetailFlipped] = useState(true);
+  const [savingImage, setSavingImage] = useState(false);
+  const [actionError, setActionError] = useState<string>();
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -86,6 +167,24 @@ export default function CollectionHome() {
   function openCard(card: Card) {
     setSelected(card);
     setDetailFlipped(true);
+    setActionError(undefined);
+  }
+
+  async function saveSelectedCardImage(node: HTMLElement) {
+    if (!selected || savingImage) {
+      return;
+    }
+    setSavingImage(true);
+    setActionError(undefined);
+    try {
+      await downloadCardImage(node, selected);
+    } catch {
+      setActionError(
+        "卡片圖片存不下來 · Could not save the card image. 請再試一次。",
+      );
+    } finally {
+      setSavingImage(false);
+    }
   }
 
   return (
@@ -194,42 +293,15 @@ export default function CollectionHome() {
       </nav>
 
       {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ff-ink/70 px-5 py-[calc(20px+env(safe-area-inset-top))] backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="detail-title"
-          onMouseDown={(event) => {
-            if (event.currentTarget === event.target) {
-              setSelected(undefined);
-            }
-          }}
-        >
-          <section className="flex w-full max-w-[350px] flex-col items-center gap-3">
-            <div className="flex w-full items-center justify-between text-ff-cream">
-              <div>
-                <p className="text-[10px] font-black tracking-[0.18em]">COLLECTION CARD</p>
-                <h2 id="detail-title" className="text-lg font-black">
-                  {selected.class.nameEn}
-                </h2>
-              </div>
-              <button
-                type="button"
-                autoFocus
-                className="min-h-11 rounded-full border-2 border-ff-cream bg-ff-plum px-4 text-sm font-black shadow-[0_3px_0_var(--color-ff-cream)]"
-                onClick={() => setSelected(undefined)}
-              >
-                Close
-              </button>
-            </div>
-            <CharacterCard
-              card={selected}
-              flipped={detailFlipped}
-              onFlip={() => setDetailFlipped((value) => !value)}
-            />
-            <p className="text-sm font-bold text-ff-cream">Tap the card to flip</p>
-          </section>
-        </div>
+        <CollectionCardDetail
+          card={selected}
+          flipped={detailFlipped}
+          savingImage={savingImage}
+          actionError={actionError}
+          onFlip={() => setDetailFlipped((value) => !value)}
+          onClose={() => setSelected(undefined)}
+          onSaveImage={(node) => void saveSelectedCardImage(node)}
+        />
       )}
     </main>
   );
