@@ -1,0 +1,225 @@
+.ritualPage {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 38%, rgb(242 191 209 / 45%), transparent 27%),
+    radial-gradient(circle at 22% 20%, #fff0ad 0 3px, transparent 4px),
+    radial-gradient(circle at 82% 72%, #fff6df 0 4px, transparent 5px),
+    linear-gradient(165deg, #39264a, #725080 52%, #9f78ae);
+}
+
+.cancelLink {
+  position: absolute;
+  z-index: 2;
+  top: calc(16px + env(safe-area-inset-top));
+  left: 16px;
+  display: flex;
+  min-width: 64px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff6df;
+  border-radius: 999px;
+  background: rgb(63 41 79 / 70%);
+  color: #fff6df;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.ritualContent {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(70px + env(safe-area-inset-top)) 24px calc(40px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.crystalBall {
+  position: relative;
+  display: flex;
+  width: 210px;
+  height: 210px;
+  align-items: center;
+  justify-content: center;
+  margin-block: 32px 38px;
+  border: 7px solid #fff0d2;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 30%, rgb(255 255 255 / 85%) 0 8px, transparent 9px),
+    radial-gradient(circle at 50% 55%, #f6bedc, #af8cda 58%, #67477f);
+  box-shadow:
+    0 0 35px #f2bfd1,
+    0 0 75px rgb(190 151 223 / 65%),
+    inset 0 0 28px rgb(255 255 255 / 60%);
+  animation: crystal-float 2.5s ease-in-out infinite;
+}
+
+.crystalBall::after {
+  position: absolute;
+  bottom: -28px;
+  width: 130px;
+  height: 34px;
+  border: 5px solid #fff0d2;
+  border-radius: 50% 50% 18px 18px;
+  background: #735080;
+  box-shadow: 0 8px 0 #3f294f;
+  content: "";
+}
+
+.crystalFace {
+  color: #fff6df;
+  font-size: 74px;
+  font-weight: 900;
+  text-shadow: 0 5px 0 #735080;
+  transform: rotate(-8deg);
+}
+
+.orbit {
+  position: absolute;
+  inset: -18px;
+  border: 3px dotted #fff0ad;
+  border-radius: 50%;
+  animation: orbit-spin 7s linear infinite;
+}
+
+.loadingLine {
+  min-height: 52px;
+  max-width: 330px;
+  margin-top: 12px;
+  color: #fff6df;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.loadingDots {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.loadingDots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff0ad;
+  animation: dot-pop 900ms ease-in-out infinite alternate;
+}
+
+.loadingDots i:nth-child(2) { animation-delay: 150ms; }
+.loadingDots i:nth-child(3) { animation-delay: 300ms; }
+
+.cardLanding {
+  position: relative;
+  width: min(100%, 352px);
+  padding: 16px;
+  border-radius: 36px;
+  animation: card-land 700ms cubic-bezier(0.2, 0.9, 0.3, 1.18) both;
+}
+
+.captureFrame {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  border-radius: 27px;
+}
+
+.commonGlow {
+  background: radial-gradient(circle, rgb(255 255 255 / 95%), transparent 68%);
+  filter: drop-shadow(0 0 20px rgb(255 255 255 / 90%));
+}
+
+.rareGlow {
+  background: radial-gradient(circle, rgb(194 166 255 / 80%), transparent 68%);
+  filter: drop-shadow(0 0 24px rgb(139 99 220 / 85%));
+}
+
+.legendaryGlow {
+  background: radial-gradient(circle, rgb(255 230 122 / 90%), transparent 68%);
+  filter: drop-shadow(0 0 28px rgb(224 161 35 / 95%));
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+  animation: actions-enter 300ms ease-out both;
+}
+
+.actions button:last-child {
+  grid-column: 1 / -1;
+}
+
+.confetti {
+  position: absolute;
+  z-index: 2;
+  inset: -30px 0 auto;
+  height: 420px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti i {
+  position: absolute;
+  left: calc(var(--confetti-x) * 1%);
+  top: -18px;
+  width: 9px;
+  height: 15px;
+  border-radius: 3px;
+  background: #d69b28;
+  animation: confetti-fall 1.8s ease-in calc(var(--confetti-index) * 45ms) both;
+  transform: rotate(calc(var(--confetti-index) * 27deg));
+}
+
+.confetti i:nth-child(3n) { background: #c85e8b; }
+.confetti i:nth-child(3n + 1) { background: #9272cf; }
+
+.errorMirror {
+  display: flex;
+  width: 104px;
+  height: 104px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  border: 5px solid #735080;
+  border-radius: 50%;
+  background: #e8dcf6;
+  color: #a73d56;
+  font-size: 52px;
+  font-weight: 950;
+  box-shadow: 0 7px 0 #735080;
+}
+
+@keyframes crystal-float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dot-pop {
+  from { opacity: 0.35; transform: translateY(0) scale(0.8); }
+  to { opacity: 1; transform: translateY(-5px) scale(1.1); }
+}
+
+@keyframes card-land {
+  from { opacity: 0; transform: translateY(-34vh) rotate(-7deg) scale(0.82); }
+  72% { opacity: 1; transform: translateY(8px) rotate(1deg) scale(1.02); }
+  to { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes actions-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes confetti-fall {
+  from { opacity: 1; transform: translateY(0) rotate(0); }
+  to { opacity: 0; transform: translateY(390px) rotate(540deg); }
+}

@@ -8,9 +8,9 @@ const RARITY_RANK: Readonly<Record<Rarity, number>> = {
   legendary: 2,
 };
 
-export function addCard(collection: readonly Card[], card: Card): Card[] {
+export function addCard(collection: Card[], card: Card): Card[] {
   if (collection.some(({ id }) => id === card.id)) {
-    return collection as Card[];
+    return collection;
   }
 
   return [...collection, card];
