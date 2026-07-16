@@ -383,9 +383,9 @@ export default function BattleGame() {
       <section className={styles.slots} aria-label="Selected battle cards">
         {mode === "quick" ? (
           <>
-            <button
-              type="button"
+            <div
               className={`${styles.slot} ${styles.activeSlot}`}
+              role="group"
               aria-label={selected.A ? `Your slot, ${selected.A.class.nameEn}` : "Your slot, empty"}
             >
               <span className={styles.slotPlayer}>YOU</span>
@@ -409,7 +409,7 @@ export default function BattleGame() {
                   <small>選擇你的卡</small>
                 </>
               )}
-            </button>
+            </div>
             <div
               className={`${styles.slot} ${styles.npcSlot}`}
               aria-label={`NPC opponent, ${selectedNpc.nameEn}`}
