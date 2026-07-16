@@ -6,6 +6,7 @@ import {
 } from "@/lib/engine/presets";
 import {
   InMemoryRoomStore,
+  OpponentConnectedError,
   RoomFullError,
   RoomNotFoundError,
   RoomUnauthorizedError,
@@ -99,5 +100,77 @@ describe("InMemoryRoomStore", () => {
     await expect(
       store.get(credentials.code, credentials.playerToken),
     ).rejects.toBeInstanceOf(RoomNotFoundError);
+  });
+
+  it("advances the reducer only for the authenticated current player", async () => {
+    const tokens = ["p1-secret", "p2-secret"];
+    const store = new InMemoryRoomStore({
+      randomCode: () => "1234",
+      randomToken: () => tokens.shift() ?? "unused",
+    });
+    const creator = await store.create(APPRENTICE_MOCHI);
+    const joiner = await store.join(creator.code, GRIMACE_MASTER);
+
+    await expect(
+      store.update(creator.code, joiner.playerToken, {
+        type: "pick",
+        pick: "hp",
+      }),
+    ).rejects.toThrow("Expected player A to pick");
+    await expect(
+      store.update(creator.code, "wrong-secret", {
+        type: "pick",
+        pick: "hp",
+      }),
+    ).rejects.toBeInstanceOf(RoomUnauthorizedError);
+
+    const afterA = await store.update(creator.code, creator.playerToken, {
+      type: "pick",
+      pick: "hp",
+    });
+    const afterB = await store.update(creator.code, joiner.playerToken, {
+      type: "pick",
+      pick: "mp",
+    });
+
+    expect(afterA.battle).toMatchObject({
+      phase: "pickB",
+      pendingPick: "hp",
+      rounds: [],
+    });
+    expect(afterB.battle).toMatchObject({
+      phase: "pickA",
+      pendingPick: null,
+      score: { A: 0, B: 1 },
+    });
+    expect(afterB.battle?.rounds[0]?.picks).toEqual({ A: "hp", B: "mp" });
+  });
+
+  it("allows a player to claim a forfeit only after the opponent is stale", async () => {
+    let now = 1_000;
+    const tokens = ["p1-secret", "p2-secret"];
+    const store = new InMemoryRoomStore({
+      now: () => now,
+      randomCode: () => "1234",
+      randomToken: () => tokens.shift() ?? "unused",
+    });
+    const creator = await store.create(APPRENTICE_MOCHI);
+    await store.join(creator.code, GRIMACE_MASTER);
+
+    await expect(
+      store.update(creator.code, creator.playerToken, { type: "forfeit" }),
+    ).rejects.toBeInstanceOf(OpponentConnectedError);
+
+    now = 31_001;
+    const finished = await store.update(
+      creator.code,
+      creator.playerToken,
+      { type: "forfeit" },
+    );
+
+    expect(finished).toMatchObject({
+      battle: { phase: "complete", winner: "A" },
+      winReason: "forfeit",
+    });
   });
 });
