@@ -1,4 +1,7 @@
-import type { BattleState } from "@/lib/engine/battle";
+import {
+  createBattleState,
+  type BattleState,
+} from "@/lib/engine/battle";
 import type { Card } from "@/lib/engine/types";
 
 export const ROOM_TTL_MS = 10 * 60 * 1_000;
@@ -30,6 +33,8 @@ export interface RoomCredentials {
 export interface RoomStore {
   create(card: Card): Promise<RoomCredentials>;
   get(code: string, token: string): Promise<RoomState>;
+  join(code: string, card: Card): Promise<RoomCredentials>;
+  expire(now?: number): Promise<number>;
 }
 
 export interface InMemoryRoomStoreOptions {
@@ -50,6 +55,12 @@ export class RoomUnauthorizedError extends Error {
   }
 }
 
+export class RoomFullError extends Error {
+  constructor() {
+    super("Room is full");
+  }
+}
+
 export class InMemoryRoomStore implements RoomStore {
   private readonly rooms = new Map<string, RoomState>();
   private readonly now: () => number;
@@ -66,7 +77,18 @@ export class InMemoryRoomStore implements RoomStore {
 
   async create(card: Card): Promise<RoomCredentials> {
     const now = this.now();
-    const code = this.randomCode();
+    await this.expire(now);
+    let code: string | null = null;
+    for (let attempt = 0; attempt < 9_000; attempt += 1) {
+      const candidate = this.randomCode();
+      if (!this.rooms.has(candidate)) {
+        code = candidate;
+        break;
+      }
+    }
+    if (code === null) {
+      throw new Error("No room codes available");
+    }
     const playerToken = this.randomToken();
     const room: RoomState = {
       code,
@@ -85,12 +107,13 @@ export class InMemoryRoomStore implements RoomStore {
   }
 
   async get(code: string, token: string): Promise<RoomState> {
+    const now = this.now();
+    await this.expire(now);
     const room = this.rooms.get(code);
     if (!room) {
       throw new RoomNotFoundError();
     }
 
-    const now = this.now();
     const player =
       room.players.A.token === token
         ? room.players.A
@@ -105,5 +128,35 @@ export class InMemoryRoomStore implements RoomStore {
     room.updatedAt = now;
     room.expiresAt = now + ROOM_TTL_MS;
     return structuredClone(room);
+  }
+
+  async join(code: string, card: Card): Promise<RoomCredentials> {
+    const now = this.now();
+    await this.expire(now);
+    const room = this.rooms.get(code);
+    if (!room) {
+      throw new RoomNotFoundError();
+    }
+    if (room.players.B) {
+      throw new RoomFullError();
+    }
+
+    const playerToken = this.randomToken();
+    room.players.B = { token: playerToken, card, lastSeenAt: now };
+    room.battle = createBattleState(room.players.A.card, card);
+    room.updatedAt = now;
+    room.expiresAt = now + ROOM_TTL_MS;
+    return { code, playerToken };
+  }
+
+  async expire(now = this.now()): Promise<number> {
+    let expired = 0;
+    for (const [code, room] of this.rooms) {
+      if (room.expiresAt <= now) {
+        this.rooms.delete(code);
+        expired += 1;
+      }
+    }
+    return expired;
   }
 }
