@@ -60,6 +60,15 @@ const GLOW_CLASS: Readonly<Record<Rarity, string>> = {
   legendary: styles.legendaryGlow,
 };
 
+function battleReturnQuery(search: string): string {
+  const params = new URLSearchParams(search);
+  if (params.get("returnTo") !== "battle") {
+    return "";
+  }
+  const player = params.get("player") === "B" ? "B" : "A";
+  return `?returnTo=battle&player=${player}`;
+}
+
 function readStoredCollection(): Card[] {
   try {
     const parsed: unknown = JSON.parse(
@@ -159,7 +168,7 @@ export default function RevealPage() {
 
   function retake() {
     sessionStorage.removeItem(PENDING_DRAW_STORAGE_KEY);
-    router.push("/draw");
+    router.push(`/draw${battleReturnQuery(window.location.search)}`);
   }
 
   function retry() {
@@ -174,7 +183,14 @@ export default function RevealPage() {
     try {
       const next = addCard(readStoredCollection(), card);
       localStorage.setItem(COLLECTION_STORAGE_KEY, JSON.stringify(next));
-      router.push("/");
+      const returnQuery = battleReturnQuery(window.location.search);
+      if (returnQuery) {
+        const params = new URLSearchParams(returnQuery);
+        const player = params.get("player") === "B" ? "B" : "A";
+        router.push(`/battle?player=${player}&card=${encodeURIComponent(card.id)}`);
+      } else {
+        router.push("/");
+      }
     } catch {
       setActionError("Collection storage is unavailable in this browser.");
     }
