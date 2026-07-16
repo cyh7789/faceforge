@@ -1,9 +1,9 @@
-export type BattleMode = "quick" | "twoPlayers";
+export type BattleMode = "quick" | "twoPlayers" | "online";
 
 export function battleModeFromSearch(search: string): BattleMode {
   const params = new URLSearchParams(search);
   const mode = params.get("mode");
-  if (mode === "quick" || mode === "twoPlayers") {
+  if (mode === "quick" || mode === "twoPlayers" || mode === "online") {
     return mode;
   }
   return params.get("player") === "B" ? "twoPlayers" : "quick";

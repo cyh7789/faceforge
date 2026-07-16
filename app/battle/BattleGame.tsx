@@ -24,6 +24,10 @@ import {
 import { pickRoast } from "@/lib/engine/roast";
 import type { Card, StatKey } from "@/lib/engine/types";
 
+import OnlineBattle from "./OnlineBattle";
+import OnlineRoomLobby, {
+  type OnlineRoomSession,
+} from "./OnlineRoomLobby";
 import styles from "./battle.module.css";
 
 const BattleCanvas = dynamic(() => import("@/games/battle/BattleCanvas"), {
@@ -112,7 +116,7 @@ interface BattleModePickerProps {
   onChange: (mode: BattleMode) => void;
 }
 
-function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
+export function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
   return (
     <section className={styles.modePicker} aria-label="Battle mode">
       <button
@@ -133,6 +137,15 @@ function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
         <strong>2 Players</strong>
         <small>同機輪流對戰</small>
       </button>
+      <button
+        type="button"
+        className={mode === "online" ? styles.activeMode : ""}
+        onClick={() => onChange("online")}
+        aria-pressed={mode === "online"}
+      >
+        <strong>Online Room</strong>
+        <small>兩支手機連線</small>
+      </button>
     </section>
   );
 }
@@ -149,6 +162,7 @@ export default function BattleGame() {
   const [inBattle, setInBattle] = useState(false);
   const [result, setResult] = useState<BattleState>();
   const [matchKey, setMatchKey] = useState(0);
+  const [onlineSession, setOnlineSession] = useState<OnlineRoomSession>();
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -215,7 +229,7 @@ export default function BattleGame() {
   const opponent = mode === "quick" ? selectedNpc : selected.B;
 
   function chooseCard(card: Card) {
-    const player = mode === "quick" ? "A" : activePlayer;
+    const player = mode === "twoPlayers" ? activePlayer : "A";
     const next = { ...selected, [player]: card };
     setSelected(next);
     storeSelections(next, selectedNpc);
@@ -232,9 +246,13 @@ export default function BattleGame() {
     setInBattle(false);
     setHandoff(false);
     setActivePlayer("A");
+    setOnlineSession(undefined);
   }
 
   function lockCard() {
+    if (mode === "online") {
+      return;
+    }
     if (mode === "quick") {
       if (selected.A) {
         setInBattle(true);
@@ -270,12 +288,17 @@ export default function BattleGame() {
     setActivePlayer("A");
     setSelected({});
     setSelectedNpc(APPRENTICE_MOCHI);
+    setOnlineSession(undefined);
     setMatchKey((key) => key + 1);
     try {
       sessionStorage.removeItem(BATTLE_SELECTION_STORAGE_KEY);
     } catch {
       // A fresh in-memory selection is enough for this session.
     }
+  }
+
+  function leaveOnlineRoom() {
+    setOnlineSession(undefined);
   }
 
   if (!hydrated) {
@@ -312,7 +335,17 @@ export default function BattleGame() {
     );
   }
 
-  if (inBattle && selected.A && opponent) {
+  if (mode === "online" && onlineSession) {
+    return (
+      <OnlineBattle
+        code={onlineSession.code}
+        token={onlineSession.token}
+        onLeave={leaveOnlineRoom}
+      />
+    );
+  }
+
+  if (mode !== "online" && inBattle && selected.A && opponent) {
     return (
       <main className={`${styles.battlePage} phone-shell`}>
         <header className={styles.arenaHeader}>
@@ -405,7 +438,11 @@ export default function BattleGame() {
           <h1>Choose Fighters</h1>
         </div>
         <span className={styles.step}>
-          {mode === "quick" ? "SOLO" : `P${activePlayer === "A" ? "1" : "2"}/2`}
+          {mode === "quick"
+            ? "SOLO"
+            : mode === "online"
+              ? "ONLINE"
+              : `P${activePlayer === "A" ? "1" : "2"}/2`}
         </span>
       </header>
 
@@ -415,13 +452,23 @@ export default function BattleGame() {
         <p className={styles.eyebrow}>
           {mode === "quick"
             ? "QUICK MATCH · SOLO"
-            : `${playerLabel(activePlayer).toUpperCase()} IS CHOOSING`}
+            : mode === "online"
+              ? "ONLINE ROOM · YOUR CARD"
+              : `${playerLabel(activePlayer).toUpperCase()} IS CHOOSING`}
         </p>
-        <h2>{mode === "quick" ? "Pick your hero and rival" : "Pick your face-born hero"}</h2>
+        <h2>
+          {mode === "quick"
+            ? "Pick your hero and rival"
+            : mode === "online"
+              ? "Pick your online hero"
+              : "Pick your face-born hero"}
+        </h2>
         <p>
           {mode === "quick"
             ? "選你的臉鬥士，再挑戰見習生或鬼臉宗師。"
-            : "選一張卡，屬性公開後用讀心術搶下兩勝。"}
+            : mode === "online"
+              ? "每支手機各選一張卡，再用四位數房號連線對戰。"
+              : "選一張卡，屬性公開後用讀心術搶下兩勝。"}
         </p>
       </section>
 
@@ -472,6 +519,42 @@ export default function BattleGame() {
               <small lang="zh-Hant">{selectedNpc.name}</small>
             </div>
           </>
+        ) : mode === "online" ? (
+          <>
+            <div
+              className={`${styles.slot} ${styles.activeSlot}`}
+              role="group"
+              aria-label={selected.A ? `Your online card, ${selected.A.class.nameEn}` : "Your online card, empty"}
+            >
+              <span className={styles.slotPlayer}>YOU</span>
+              {selected.A ? (
+                <>
+                  <span className={styles.slotImage}>
+                    <Image
+                      src={CLASS_ASSETS[selected.A.class.key]}
+                      alt=""
+                      fill
+                      sizes="150px"
+                    />
+                  </span>
+                  <strong>{selected.A.class.nameEn}</strong>
+                  <small lang="zh-Hant">{selected.A.class.name}</small>
+                </>
+              ) : (
+                <>
+                  <span className={styles.slotQuestion} aria-hidden="true">?</span>
+                  <strong>Choose Hero</strong>
+                  <small>選擇你的卡</small>
+                </>
+              )}
+            </div>
+            <div className={`${styles.slot} ${styles.onlineRoomSlot}`}>
+              <span className={styles.slotPlayer}>ROOM</span>
+              <span className={styles.roomSlotCode} aria-hidden="true">####</span>
+              <strong>LAN Battle</strong>
+              <small>建立或輸入房號</small>
+            </div>
+          </>
         ) : (["A", "B"] as const).map((player) => {
           const card = selected[player];
           const isActive = activePlayer === player;
@@ -515,14 +598,16 @@ export default function BattleGame() {
           <div>
             <p className={styles.eyebrow}>COLLECTION</p>
             <h2 id="roster-title">
-              {mode === "quick" ? "Choose your hero" : `Choose for ${playerLabel(activePlayer)}`}
+              {mode === "twoPlayers"
+                ? `Choose for ${playerLabel(activePlayer)}`
+                : "Choose your hero"}
             </h2>
           </div>
           <span>{collection.length} cards</span>
         </div>
         <div className={styles.cardGrid}>
           {collection.map((card) => {
-            const choosingPlayer = mode === "quick" ? "A" : activePlayer;
+            const choosingPlayer = mode === "twoPlayers" ? activePlayer : "A";
             const chosen = selected[choosingPlayer]?.id === card.id;
             return (
               <button
@@ -600,36 +685,54 @@ export default function BattleGame() {
         </section>
       )}
 
-      <div className={styles.selectionActions}>
-        <Link
-          href={`/draw?returnTo=battle&mode=${mode}&player=${mode === "quick" ? "A" : activePlayer}`}
-          className="sticker-button sticker-button-secondary"
-        >
-          <span>Draw New</span>
-          <small>現場抽一張</small>
-        </Link>
-        <button
-          type="button"
-          className="sticker-button sticker-button-primary"
-          onClick={lockCard}
-          disabled={!selected[mode === "quick" ? "A" : activePlayer]}
-        >
-          <span>
-            {mode === "quick"
-              ? "Enter Arena"
-              : activePlayer === "A"
-                ? "Lock P1 Card"
-                : "Enter Arena"}
-          </span>
-          <small>
-            {mode === "quick"
-              ? "開始快速對戰"
-              : activePlayer === "A"
-                ? "鎖定並交機"
-                : "開始對戰"}
-          </small>
-        </button>
-      </div>
+      {mode === "online" ? (
+        <>
+          <OnlineRoomLobby
+            card={selected.A}
+            onConnected={setOnlineSession}
+          />
+          <div className={`${styles.selectionActions} ${styles.onlineDrawAction}`}>
+            <Link
+              href="/draw?returnTo=battle&mode=online&player=A"
+              className="sticker-button sticker-button-secondary"
+            >
+              <span>Draw New</span>
+              <small>現場抽一張</small>
+            </Link>
+          </div>
+        </>
+      ) : (
+        <div className={styles.selectionActions}>
+          <Link
+            href={`/draw?returnTo=battle&mode=${mode}&player=${mode === "quick" ? "A" : activePlayer}`}
+            className="sticker-button sticker-button-secondary"
+          >
+            <span>Draw New</span>
+            <small>現場抽一張</small>
+          </Link>
+          <button
+            type="button"
+            className="sticker-button sticker-button-primary"
+            onClick={lockCard}
+            disabled={!selected[mode === "quick" ? "A" : activePlayer]}
+          >
+            <span>
+              {mode === "quick"
+                ? "Enter Arena"
+                : activePlayer === "A"
+                  ? "Lock P1 Card"
+                  : "Enter Arena"}
+            </span>
+            <small>
+              {mode === "quick"
+                ? "開始快速對戰"
+                : activePlayer === "A"
+                  ? "鎖定並交機"
+                  : "開始對戰"}
+            </small>
+          </button>
+        </div>
+      )}
 
       {mode === "twoPlayers" && handoff && (
         <div className={styles.handoff} role="dialog" aria-modal="true" aria-labelledby="handoff-title">
