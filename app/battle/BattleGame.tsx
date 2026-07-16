@@ -307,6 +307,7 @@ export default function BattleGame() {
           key={matchKey}
           cardA={selected.A}
           cardB={opponent}
+          npcStrategy={mode === "quick" ? selectedNpc.npcStrategy : undefined}
           onComplete={setResult}
         />
 

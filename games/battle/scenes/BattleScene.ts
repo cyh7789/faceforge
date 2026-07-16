@@ -5,6 +5,8 @@ import type {
   BattlePlayer,
   BattleRound,
 } from "@/lib/engine/battle";
+import type { NpcStrategy } from "@/lib/engine/npc";
+import { isPresetCard } from "@/lib/engine/presets";
 import type { StatKey } from "@/lib/engine/types";
 
 import {
@@ -24,6 +26,7 @@ type FighterMap<T> = Record<BattlePlayer, T>;
 
 export class BattleScene extends Phaser.Scene {
   private readonly reducedMotion: boolean;
+  private readonly npcStrategy?: NpcStrategy;
   private fighterSprites!: FighterMap<Phaser.GameObjects.Image>;
   private scorePips!: FighterMap<Phaser.GameObjects.Arc[]>;
   private transientObjects: Phaser.GameObjects.GameObject[] = [];
@@ -32,9 +35,10 @@ export class BattleScene extends Phaser.Scene {
   private busy = true;
   private wakeTimers: number[] = [];
 
-  constructor(reducedMotion: boolean) {
+  constructor(reducedMotion: boolean, npcStrategy?: NpcStrategy) {
     super("BattleScene");
     this.reducedMotion = reducedMotion;
+    this.npcStrategy = npcStrategy;
   }
 
   init() {
@@ -107,6 +111,8 @@ export class BattleScene extends Phaser.Scene {
 
   private createFighters() {
     const { A, B } = gameState.match.cards;
+    const nameA = isPresetCard(A) ? `${A.nameEn}\n${A.name}` : `${A.class.nameEn}\n${A.class.name}`;
+    const nameB = isPresetCard(B) ? `${B.nameEn}\n${B.name}` : `${B.class.nameEn}\n${B.class.name}`;
     const spriteA = this.add
       .image(-LAYOUT.SPRITE_SIZE, LAYOUT.SPRITE_Y, this.textureKey("A"))
       .setDisplaySize(LAYOUT.SPRITE_SIZE, LAYOUT.SPRITE_SIZE)
@@ -119,7 +125,7 @@ export class BattleScene extends Phaser.Scene {
     this.fighterSprites = { A: spriteA, B: spriteB };
 
     this.add
-      .text(LAYOUT.SPRITE_X.A, LAYOUT.NAME_Y, `${A.class.nameEn}\n${A.class.name}`, {
+      .text(LAYOUT.SPRITE_X.A, LAYOUT.NAME_Y, nameA, {
         align: "center",
         color: "#3f294f",
         fontFamily: TEXT_STYLE.FONT,
@@ -130,7 +136,7 @@ export class BattleScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(5);
     this.add
-      .text(LAYOUT.SPRITE_X.B, LAYOUT.NAME_Y, `${B.class.nameEn}\n${B.class.name}`, {
+      .text(LAYOUT.SPRITE_X.B, LAYOUT.NAME_Y, nameB, {
         align: "center",
         color: "#3f294f",
         fontFamily: TEXT_STYLE.FONT,
@@ -147,12 +153,17 @@ export class BattleScene extends Phaser.Scene {
       const direction = player === "A" ? 1 : -1;
       const startX = player === "A" ? 28 : GAME.WIDTH - 28;
       this.add
-        .text(startX, LAYOUT.SCORE_Y, player === "A" ? "P1" : "P2", {
+        .text(
+          startX,
+          LAYOUT.SCORE_Y,
+          this.npcStrategy ? (player === "A" ? "YOU" : "NPC") : player === "A" ? "P1" : "P2",
+          {
           color: "#3f294f",
           fontFamily: TEXT_STYLE.FONT,
           fontSize: TEXT_STYLE.SMALL_SIZE,
           fontStyle: "bold",
-        })
+          },
+        )
         .setOrigin(0.5)
         .setDepth(8);
 
@@ -298,7 +309,7 @@ export class BattleScene extends Phaser.Scene {
       .text(
         GAME.WIDTH / 2,
         LAYOUT.PICK_TITLE_Y,
-        `${player === "A" ? "PLAYER 1" : "PLAYER 2"} PICK\n選一項未使用的屬性`,
+        `${this.npcStrategy ? "YOUR" : player === "A" ? "PLAYER 1" : "PLAYER 2"} PICK\n選一項未使用的屬性`,
         {
           align: "center",
           color: "#3f294f",
@@ -403,12 +414,70 @@ export class BattleScene extends Phaser.Scene {
     EventBus.emit(Events.BATTLE_STATE_CHANGED, state);
 
     if (player === "A") {
+      if (this.npcStrategy) {
+        this.showNpcThinking();
+        return;
+      }
       this.showPassInterstitial();
       return;
     }
 
     const round = state.rounds[state.rounds.length - 1];
     this.revealRound(round);
+  }
+
+  private showNpcThinking() {
+    const strategy = this.npcStrategy;
+    if (!strategy) {
+      return;
+    }
+
+    this.clearTransientObjects();
+    this.availablePicks = [];
+    this.awaitingPass = false;
+    this.busy = true;
+
+    const graphics = this.add.graphics();
+    graphics.fillStyle(COLORS.WHITE);
+    graphics.fillRoundedRect(
+      -LAYOUT.NPC_BUBBLE_WIDTH / 2,
+      -LAYOUT.NPC_BUBBLE_HEIGHT / 2,
+      LAYOUT.NPC_BUBBLE_WIDTH,
+      LAYOUT.NPC_BUBBLE_HEIGHT,
+      14,
+    );
+    graphics.fillTriangle(9, 12, 22, 12, 18, 25);
+    graphics.lineStyle(3, COLORS.PLUM);
+    graphics.strokeRoundedRect(
+      -LAYOUT.NPC_BUBBLE_WIDTH / 2,
+      -LAYOUT.NPC_BUBBLE_HEIGHT / 2,
+      LAYOUT.NPC_BUBBLE_WIDTH,
+      LAYOUT.NPC_BUBBLE_HEIGHT,
+      14,
+    );
+    const dots = this.add
+      .text(0, -5, "...", {
+        color: "#3f294f",
+        fontFamily: TEXT_STYLE.FONT,
+        fontSize: TEXT_STYLE.TITLE_SIZE,
+        fontStyle: "bold",
+      })
+      .setOrigin(0.5);
+    const bubble = this.add
+      .container(LAYOUT.SPRITE_X.B, LAYOUT.NPC_THINK_Y, [graphics, dots])
+      .setDepth(42);
+    this.transientObjects.push(bubble);
+
+    this.delay(() => {
+      const state = gameState.pickNpc(strategy);
+      const round = state.rounds[state.rounds.length - 1];
+      EventBus.emit(Events.SPECTACLE_ACTION, {
+        player: "B",
+        stat: round.picks.B,
+      });
+      EventBus.emit(Events.BATTLE_STATE_CHANGED, state);
+      this.revealRound(round);
+    }, TIMING.NPC_THINK, true);
   }
 
   private showPassInterstitial() {

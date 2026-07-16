@@ -4,6 +4,7 @@ import Phaser from "phaser";
 import { useEffect, useRef } from "react";
 
 import type { BattleState } from "@/lib/engine/battle";
+import type { NpcStrategy } from "@/lib/engine/npc";
 import type { Card } from "@/lib/engine/types";
 
 import { GAME } from "./core/Constants";
@@ -26,12 +27,14 @@ declare global {
 interface BattleCanvasProps {
   cardA: Card;
   cardB: Card;
+  npcStrategy?: NpcStrategy;
   onComplete: (state: BattleState) => void;
 }
 
 export default function BattleCanvas({
   cardA,
   cardB,
+  npcStrategy,
   onComplete,
 }: BattleCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -66,7 +69,7 @@ export default function BattleCanvas({
         width: GAME.WIDTH,
         height: GAME.HEIGHT,
       },
-      scene: [new BattleScene(reducedMotion)],
+      scene: [new BattleScene(reducedMotion, npcStrategy)],
     });
 
     const handleComplete = (state: BattleState) => onCompleteRef.current(state);
@@ -78,16 +81,26 @@ export default function BattleCanvas({
     window.__EVENTS__ = Events;
     window.render_game_to_text = () => {
       const state = gameState.match;
-      const activePlayer = state.phase === "pickA" ? "A" : state.phase === "pickB" ? "B" : null;
+      const activePlayer = state.phase === "pickA"
+        ? "A"
+        : state.phase === "pickB"
+          ? npcStrategy
+            ? "NPC"
+            : "B"
+          : null;
       return JSON.stringify({
         coords: "origin:top-left x:right y:down canvas:430x650",
         mode: state.phase === "complete" ? "game_over" : "playing",
+        battleMode: npcStrategy ? "quick" : "twoPlayers",
         scene: game.scene.getScenes(true)[0]?.scene.key ?? null,
         phase: state.phase,
         activePlayer,
         score: state.score,
         usedStats: state.usedStats,
-        availableStats: activePlayer ? gameState.available(activePlayer) : [],
+        availableStats:
+          activePlayer === "A" || activePlayer === "B"
+            ? gameState.available(activePlayer)
+            : [],
         round: state.score.A + state.score.B + 1,
         winner: state.winner,
       });
@@ -107,7 +120,7 @@ export default function BattleCanvas({
         delete window.advanceTime;
       }
     };
-  }, [cardA, cardB]);
+  }, [cardA, cardB, npcStrategy]);
 
   return (
     <div className={styles.shell}>
@@ -115,10 +128,14 @@ export default function BattleCanvas({
         ref={mountRef}
         className={styles.mount}
         role="application"
-        aria-label="FaceForge turn-based battle. Pick stats with touch, click, or number keys one through six."
+        aria-label={`FaceForge turn-based battle. Pick stats with touch, click, or number keys one through six.${npcStrategy ? " The NPC picks automatically." : " Press Enter when passing the device."}`}
         tabIndex={0}
       />
-      <p className={styles.hint}>Tap a stat · Keyboard: 1–6 · Enter to pass</p>
+      <p className={styles.hint}>
+        {npcStrategy
+          ? "Tap a stat · Keyboard: 1–6 · NPC auto-picks"
+          : "Tap a stat · Keyboard: 1–6 · Enter to pass"}
+      </p>
     </div>
   );
 }

@@ -5,6 +5,11 @@ import {
   type BattlePlayer,
   type BattleState,
 } from "@/lib/engine/battle";
+import {
+  playNpcTurn,
+  type NpcStrategy,
+  type RandomSource,
+} from "@/lib/engine/npc";
 import type { Card, StatKey } from "@/lib/engine/types";
 
 class BattleGameState {
@@ -24,6 +29,14 @@ class BattleGameState {
 
   pick(player: BattlePlayer, pick: StatKey): BattleState {
     this.current = battleReducer(this.match, { type: "pick", player, pick });
+    return this.current;
+  }
+
+  pickNpc(
+    strategy: NpcStrategy,
+    rng: RandomSource = Math.random,
+  ): BattleState {
+    this.current = playNpcTurn(this.match, strategy, rng);
     return this.current;
   }
 
