@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { addCard, bestCardForClass } from "./collection";
+import { APPRENTICE_MOCHI } from "./engine/presets";
 import type { Card, Rarity } from "./engine/types";
 
 function card(id: string, rarity: Rarity = "common"): Card {
@@ -64,6 +65,12 @@ describe("addCard", () => {
 
     expect(next).toHaveLength(2);
   });
+
+  it("does not add preset opponents to the player collection", () => {
+    const original = [card("player-card")];
+
+    expect(addCard(original, APPRENTICE_MOCHI)).toBe(original);
+  });
 });
 
 describe("bestCardForClass", () => {
@@ -78,5 +85,11 @@ describe("bestCardForClass", () => {
         "dry_mage",
       ),
     ).toBe(newerLegendary);
+  });
+
+  it("does not count a preset opponent as an unlocked class", () => {
+    expect(
+      bestCardForClass([APPRENTICE_MOCHI], APPRENTICE_MOCHI.class.key),
+    ).toBeUndefined();
   });
 });
