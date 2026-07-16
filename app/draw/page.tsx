@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { battleReturnQuery } from "@/lib/battle-navigation";
 import { PENDING_DRAW_STORAGE_KEY } from "@/lib/draw-session";
 import {
   createLocalFaceDetector,
@@ -28,15 +29,6 @@ interface Shot {
   blob: Blob;
   previewUrl: string;
   source: "camera" | "upload";
-}
-
-function battleReturnQuery(search: string): string {
-  const params = new URLSearchParams(search);
-  if (params.get("returnTo") !== "battle") {
-    return "";
-  }
-  const player = params.get("player") === "B" ? "B" : "A";
-  return `?returnTo=battle&player=${player}`;
 }
 
 async function downscaleToJpeg(blob: Blob): Promise<string> {

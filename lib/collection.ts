@@ -9,7 +9,7 @@ const RARITY_RANK: Readonly<Record<Rarity, number>> = {
 };
 
 export function addCard(collection: Card[], card: Card): Card[] {
-  if (collection.some(({ id }) => id === card.id)) {
+  if (card.isPreset || collection.some(({ id }) => id === card.id)) {
     return collection;
   }
 
@@ -24,6 +24,7 @@ export function bestCardForClass(
 
   for (const card of collection) {
     if (
+      !card.isPreset &&
       card.class.key === classKey &&
       (!best || RARITY_RANK[card.rarity] >= RARITY_RANK[best.rarity])
     ) {

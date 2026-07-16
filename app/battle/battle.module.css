@@ -69,6 +69,48 @@
   font-weight: 950;
 }
 
+.modePicker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 18px;
+  padding: 5px;
+  gap: 6px;
+  border: 3px solid var(--color-ff-plum);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 64%);
+  box-shadow: 0 5px 0 var(--color-ff-cream-deep);
+}
+
+.modePicker button {
+  display: flex;
+  min-height: 58px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--color-ff-plum);
+}
+
+.modePicker strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.modePicker small {
+  margin-top: 2px;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.modePicker .activeMode {
+  border-color: var(--color-ff-plum);
+  background: var(--color-ff-pink);
+  color: var(--color-ff-ink);
+  box-shadow: 0 3px 0 var(--color-ff-plum);
+}
+
 .introCopy {
   margin-block: 25px 18px;
   text-align: center;
@@ -128,6 +170,11 @@
   background: var(--color-ff-gold-soft);
   box-shadow: 0 6px 0 var(--color-ff-plum);
   transform: translateY(-2px);
+}
+
+.npcSlot {
+  border-style: solid;
+  background: var(--color-ff-lavender-soft);
 }
 
 .slot:disabled:not(.activeSlot) {
@@ -192,6 +239,80 @@
   border-radius: 24px;
   background: rgb(255 251 235 / 88%);
   box-shadow: 0 6px 0 var(--color-ff-cream-deep);
+}
+
+.npcPanel {
+  margin-top: 14px;
+  padding: 15px;
+  border: 3px solid var(--color-ff-plum);
+  border-radius: 24px;
+  background: rgb(232 220 246 / 82%);
+  box-shadow: 0 6px 0 var(--color-ff-cream-deep);
+}
+
+.npcGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 12px;
+  gap: 9px;
+}
+
+.npcChoice {
+  display: grid;
+  min-width: 0;
+  min-height: 104px;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  padding: 7px;
+  border: 2px solid var(--color-ff-cream-deep);
+  border-radius: 17px;
+  background: #fff;
+  color: var(--color-ff-ink);
+  text-align: left;
+}
+
+.chosenNpc {
+  border: 3px solid var(--color-ff-pink-deep);
+  background: var(--color-ff-gold-soft);
+  box-shadow: 0 4px 0 var(--color-ff-plum);
+}
+
+.npcImage {
+  position: relative;
+  display: block;
+  width: 60px;
+  height: 76px;
+}
+
+.npcImage img {
+  object-fit: contain;
+}
+
+.npcChoice > span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.npcChoice strong {
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.npcChoice small {
+  margin-top: 2px;
+  color: var(--color-ff-plum);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.npcChoice i {
+  margin-top: 5px;
+  color: var(--color-ff-pink-deep);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 950;
 }
 
 .sectionHeading {
@@ -365,7 +486,7 @@
 }
 
 .emptyPanel {
-  margin-top: min(20vh, 150px);
+  margin-top: min(12vh, 96px);
   padding: 30px 24px;
   border: 3px solid var(--color-ff-plum);
   border-radius: 28px;

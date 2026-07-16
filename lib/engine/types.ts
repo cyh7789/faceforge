@@ -70,6 +70,7 @@ export interface Curse {
 
 export interface Card {
   id: string;
+  isPreset?: true;
   class: ClassInfo;
   rarity: Rarity;
   weirdness: number;
