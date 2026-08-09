@@ -16,21 +16,20 @@ export function DetectorLoadingPanel({
       </div>
       <p className={styles.loadingEyebrow}>FIRST-TIME FACE MAGIC</p>
       <h2>
-        魔鏡甦醒中…
-        <small>Waking the mirror…</small>
+        Waking the mirror…
       </h2>
       <div className={styles.detectorProgress} aria-hidden="true">
         <i />
       </div>
       <p className={styles.detectorHint}>
-        首次載入約 11 MB，完成後拍照會更快。
+        First load is about 11 MB. Photos will be faster after that.
         <small>Loading face magic once for this browser.</small>
       </p>
       {showSkip && (
         <div className={styles.detectorEscape}>
-          <p>載入比預期久一點 · Taking longer than expected</p>
+          <p>Taking longer than expected</p>
           <button type="button" onClick={onSkip}>
-            略過偵測 · Skip detection
+            Skip detection
           </button>
         </div>
       )}

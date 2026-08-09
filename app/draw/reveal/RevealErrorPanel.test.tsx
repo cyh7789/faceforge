@@ -14,10 +14,12 @@ describe("RevealErrorPanel", () => {
       }),
     );
 
-    expect(html).toContain("魔鏡找不到臉！");
     expect(html).toContain("No face found!");
-    expect(html).toContain("請讓一張清楚、沒被遮住的臉待在畫面中央");
-    expect(html).toContain("重拍 · Retake Photo");
+    expect(html).toContain("The mirror can&#x27;t find a face!");
+    expect(html).toContain(
+      "Keep one clear, uncovered face centered in the frame.",
+    );
+    expect(html).toContain("Retake Photo");
     expect(html).not.toContain("Retry Ritual");
   });
 
@@ -30,10 +32,10 @@ describe("RevealErrorPanel", () => {
       }),
     );
 
-    expect(html).toContain("魔鏡起霧了！");
     expect(html).toContain("The mirror went cloudy!");
-    expect(html).toContain("照片還在");
-    expect(html).toContain("再試一次 · Retry Ritual");
-    expect(html).toContain("重拍 · Retake Photo");
+    expect(html).toContain("The mirror fogged up!");
+    expect(html).toContain("Your photo is safe. Retry, or take another one.");
+    expect(html).toContain("Retry Ritual");
+    expect(html).toContain("Retake Photo");
   });
 });

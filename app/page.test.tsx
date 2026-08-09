@@ -24,9 +24,9 @@ describe("CollectionCardDetail", () => {
     );
 
     expect(html).toContain('role="dialog"');
-    expect(html).toContain("Close · 關閉");
-    expect(html).toContain("Tap the card to flip · 點卡片翻面");
-    expect(html).toContain("Save Card Image · 儲存卡片圖片");
+    expect(html).toContain("Close");
+    expect(html).toContain("Tap the card to flip");
+    expect(html).toContain("Save Card Image");
     expect(html).toContain(`View card back: ${APPRENTICE_MOCHI.class.nameEn}`);
   });
 });

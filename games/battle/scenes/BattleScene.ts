@@ -314,7 +314,7 @@ export class BattleScene extends Phaser.Scene {
       .text(
         GAME.WIDTH / 2,
         LAYOUT.PICK_TITLE_Y,
-        `${this.npcStrategy ? "YOUR" : player === "A" ? "PLAYER 1" : "PLAYER 2"} PICK\n選一項未使用的屬性`,
+        `${this.npcStrategy ? "YOUR" : player === "A" ? "PLAYER 1" : "PLAYER 2"} PICK\nChoose an unused stat`,
         {
           align: "center",
           color: "#3f294f",
@@ -516,7 +516,7 @@ export class BattleScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(41);
     const subtitle = this.add
-      .text(GAME.WIDTH / 2, GAME.HEIGHT / 2 + 68, "交給玩家 2 · Tap when ready", {
+      .text(GAME.WIDTH / 2, GAME.HEIGHT / 2 + 68, "Pass to Player 2 · Tap when ready", {
         color: "#e8dcf6",
         fontFamily: TEXT_STYLE.FONT,
         fontSize: TEXT_STYLE.BODY_SIZE,
@@ -542,7 +542,7 @@ export class BattleScene extends Phaser.Scene {
     this.busy = true;
 
     const heading = this.add
-      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y, "REVEAL! · 同時揭曉", {
+      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y, "REVEAL!", {
         color: "#b24675",
         fontFamily: TEXT_STYLE.FONT,
         fontSize: TEXT_STYLE.TITLE_SIZE,
@@ -659,8 +659,8 @@ export class BattleScene extends Phaser.Scene {
       const battleComplete = gameState.match.phase === "complete";
       this.showRoundBanner(
         battleComplete
-          ? "FINAL TIE — MATCH DECISION\n最終平手，結算勝負"
-          : "TIE — PICK AGAIN\n平手，雙方重選",
+          ? "FINAL TIE — MATCH DECISION"
+          : "TIE — PICK AGAIN",
         COLORS.LAVENDER,
       );
       this.delay(() => {
@@ -825,7 +825,7 @@ export class BattleScene extends Phaser.Scene {
     this.busy = true;
 
     const copy = this.add
-      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y + 55, "MATCH DRAW!\n雙方平手", {
+      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y + 55, "MATCH DRAW!", {
         align: "center",
         color: "#3f294f",
         fontFamily: TEXT_STYLE.FONT,
@@ -856,7 +856,7 @@ export class BattleScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(25);
     const copy = this.add
-      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y + 55, "MATCH VICTORY!\n勝利姿態解鎖", {
+      .text(GAME.WIDTH / 2, LAYOUT.PICK_TITLE_Y + 55, "MATCH VICTORY!", {
         align: "center",
         color: "#3f294f",
         fontFamily: TEXT_STYLE.FONT,

@@ -57,6 +57,6 @@ describe("OnlineRoomControls", () => {
     );
 
     expect(html).toContain("找不到房間 · Room not found");
-    expect(html).toContain("建立新房 · Create New Room");
+    expect(html).toContain("Create New Room");
   });
 });

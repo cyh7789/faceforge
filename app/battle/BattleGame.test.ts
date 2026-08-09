@@ -65,13 +65,13 @@ describe("BattleGame result overlay", () => {
     const html = renderToStaticMarkup(createElement(BattleGame));
 
     expect(html).toContain("Draw!");
-    expect(html).toContain(`魔鏡給 ${APPRENTICE_MOCHI.name}`);
+    expect(html).toContain(`roast for ${APPRENTICE_MOCHI.name}`);
     expect(html).toContain(APPRENTICE_MOCHI.curse.name);
-    expect(html).toContain(`魔鏡給 ${GRIMACE_MASTER.name}`);
+    expect(html).toContain(`roast for ${GRIMACE_MASTER.name}`);
     expect(html).toContain(GRIMACE_MASTER.curse.name);
     expect(html).toContain("Rematch");
     expect(html).toContain("Change Cards");
-    expect(html).toContain("Home · 回首頁");
+    expect(html).toContain("Home");
   });
 });
 
@@ -85,7 +85,7 @@ describe("BattleGame mode picker", () => {
     );
 
     expect(html).toContain("Online Room");
-    expect(html).toContain("兩支手機連線");
+    expect(html).toContain("Connect two phones");
     expect(html).toContain('aria-pressed="true"');
   });
 });

@@ -20,10 +20,10 @@ import {
 import styles from "./reveal.module.css";
 
 const LOADING_LINES = [
-  "觀測毛孔星象中… Reading your pore constellations…",
-  "解讀皺紋古文書… Translating ancient wrinkle scrolls…",
-  "召喚臉部命運… Summoning your face-born fate…",
-  "衡量怪力波動… Measuring strange energy…",
+  "Reading your pore constellations…",
+  "Translating ancient wrinkle scrolls…",
+  "Summoning your face-born fate…",
+  "Measuring strange energy…",
 ] as const;
 
 const GLOW_CLASS: Readonly<Record<Rarity, string>> = {
@@ -155,7 +155,7 @@ export default function RevealPage() {
     try {
       await downloadCardImage(cardCaptureRef.current, card);
     } catch {
-      setActionError("卡片圖片存不下來 · Could not save the card image. 請再試一次。");
+      setActionError("Could not save the card image. Please try again.");
     } finally {
       setSavingImage(false);
     }
@@ -246,14 +246,14 @@ export default function RevealPage() {
             className="sticker-button sticker-button-secondary"
             onClick={() => setFlipped(false)}
           >
-            看卡背 · View Card Back
+            View Card Back
           </button>
           <button
             type="button"
             className="sticker-button sticker-button-primary"
             onClick={saveToCollection}
           >
-            收進圖鑑 · Save to Collection
+            Save to Collection
           </button>
           <button
             type="button"
@@ -261,7 +261,7 @@ export default function RevealPage() {
             onClick={saveCardImage}
             disabled={savingImage}
           >
-            {savingImage ? "儲存中 · Saving…" : "儲存卡片圖片 · Save Card Image"}
+            {savingImage ? "Saving…" : "Save Card Image"}
           </button>
         </section>
       )}

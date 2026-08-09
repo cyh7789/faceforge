@@ -108,7 +108,9 @@ describe("online battle polling UX", () => {
     );
     expect(forfeited).toContain("You Win!");
     expect(forfeited).toContain("Win by forfeit");
-    expect(forfeited).toContain("對手離線，這局由你收下");
+    expect(forfeited).toContain(
+      "Opponent disconnected, you take this round.",
+    );
 
     const draw = render(
       view({ phase: "complete", turn: null, winner: "draw" }),
@@ -117,12 +119,12 @@ describe("online battle polling UX", () => {
   });
 
   it("maps full, missing, and expired room errors to actionable copy", () => {
-    expect(onlineRoomErrorMessage("ROOM_FULL")).toContain("房間已滿 · Room full");
+    expect(onlineRoomErrorMessage("ROOM_FULL")).toContain("Room full");
     expect(onlineRoomErrorMessage("ROOM_NOT_FOUND")).toContain(
-      "找不到房間 · Room not found",
+      "Room not found",
     );
     expect(onlineRoomErrorMessage("ROOM_EXPIRED")).toContain(
-      "房間已過期 · Room expired",
+      "Room expired",
     );
   });
 
@@ -133,7 +135,7 @@ describe("online battle polling UX", () => {
       onlineRoomErrorMessage("ROOM_EXPIRED"),
     );
 
-    expect(html).toContain("房間已過期 · Room expired");
-    expect(html).toContain("返回大廳 · Back to Lobby");
+    expect(html).toContain("Room expired");
+    expect(html).toContain("Back to Lobby");
   });
 });

@@ -93,12 +93,12 @@ export const TEXT_STYLE = {
 export const STAT_LABELS: Readonly<
   Record<StatKey, { label: string; subtitle: string }>
 > = {
-  hp: { label: "HP", subtitle: "生命" },
-  mp: { label: "MP", subtitle: "魔力" },
-  def: { label: "DEF", subtitle: "防禦" },
-  agi: { label: "AGI", subtitle: "敏捷" },
-  luk: { label: "LUK", subtitle: "幸運" },
-  grit: { label: "GRT", subtitle: "韌性" },
+  hp: { label: "HP", subtitle: "Health" },
+  mp: { label: "MP", subtitle: "Mana" },
+  def: { label: "DEF", subtitle: "Defense" },
+  agi: { label: "AGI", subtitle: "Agility" },
+  luk: { label: "LUK", subtitle: "Luck" },
+  grit: { label: "GRT", subtitle: "Grit" },
 };
 
 export const TEXTURE = {

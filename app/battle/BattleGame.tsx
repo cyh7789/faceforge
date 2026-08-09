@@ -126,7 +126,7 @@ export function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
         aria-pressed={mode === "quick"}
       >
         <strong>Quick Match</strong>
-        <small>單人挑戰 NPC</small>
+        <small>Solo vs NPC</small>
       </button>
       <button
         type="button"
@@ -135,7 +135,7 @@ export function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
         aria-pressed={mode === "twoPlayers"}
       >
         <strong>2 Players</strong>
-        <small>同機輪流對戰</small>
+        <small>Take turns on one device</small>
       </button>
       <button
         type="button"
@@ -144,7 +144,7 @@ export function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
         aria-pressed={mode === "online"}
       >
         <strong>Online Room</strong>
-        <small>兩支手機連線</small>
+        <small>Connect two phones</small>
       </button>
     </section>
   );
@@ -322,13 +322,13 @@ export default function BattleGame() {
           <div className={styles.emptyVs} aria-hidden="true">VS</div>
           <p className={styles.eyebrow}>YOUR ROSTER IS EMPTY</p>
           <h1>Draw a hero first</h1>
-          <p>先抽一張臉鬥士卡，魔鏡才有選手可以派上場。</p>
+          <p>Draw a face-fighter card first so the Mirror has a fighter to send in.</p>
           <Link
             href={`/draw?returnTo=battle&mode=${mode}&player=A`}
             className="sticker-button sticker-button-primary"
           >
             <span>Draw First Card</span>
-            <small>先去抽卡</small>
+            <small>Draw a Card First</small>
           </Link>
         </section>
       </main>
@@ -373,8 +373,8 @@ export default function BattleGame() {
                   <div className={styles.crown} aria-hidden="true">≈</div>
                   <p className={styles.eyebrow}>MATCH DRAW</p>
                   <h2 id="result-title">Draw!</h2>
-                  <p className={styles.classSubtitle} lang="zh-Hant">
-                    雙方都逃不過魔鏡
+                  <p className={styles.classSubtitle}>
+                    Neither side escapes the Mirror
                   </p>
                 </>
               ) : winner && loser ? (
@@ -400,27 +400,27 @@ export default function BattleGame() {
                 <div className={styles.drawRoasts}>
                   {drawRoasts.map(({ card, roast }) => (
                     <div key={card.id} className={styles.roastBubble} lang="zh-Hant">
-                      <strong>魔鏡給 {cardName(card)}：</strong>
+                      <strong>The Mirror&apos;s roast for {cardName(card)}:</strong>
                       <p>「{roast}」</p>
                     </div>
                   ))}
                 </div>
               ) : loser ? (
                 <div className={styles.roastBubble} lang="zh-Hant">
-                  <strong>魔鏡給 {cardName(loser)}：</strong>
+                  <strong>The Mirror&apos;s roast for {cardName(loser)}:</strong>
                   <p>「{loserRoast}」</p>
                 </div>
               ) : null}
               <div className={styles.resultActions}>
                 <button type="button" onClick={rematch} className="sticker-button sticker-button-primary">
                   <span>Rematch</span>
-                  <small>同卡再戰</small>
+                  <small>Same Cards</small>
                 </button>
                 <button type="button" onClick={changeCards} className="sticker-button sticker-button-secondary">
                   <span>Change Cards</span>
-                  <small>重新出卡</small>
+                  <small>Pick New Cards</small>
                 </button>
-                <Link href="/" className={styles.homeAction}>Home · 回首頁</Link>
+                <Link href="/" className={styles.homeAction}>Home</Link>
               </div>
             </section>
           </div>
@@ -465,10 +465,10 @@ export default function BattleGame() {
         </h2>
         <p>
           {mode === "quick"
-            ? "選你的臉鬥士，再挑戰見習生或鬼臉宗師。"
+            ? "Pick your face-fighter, then challenge the apprentice or the grimace master."
             : mode === "online"
-              ? "每支手機各選一張卡，再用四位數房號連線對戰。"
-              : "選一張卡，屬性公開後用讀心術搶下兩勝。"}
+              ? "Each phone picks one card, then connect with a 4-digit room code."
+              : "Pick a card, then read the stats and win two rounds first."}
         </p>
       </section>
 
@@ -498,7 +498,7 @@ export default function BattleGame() {
                 <>
                   <span className={styles.slotQuestion} aria-hidden="true">?</span>
                   <strong>Choose Hero</strong>
-                  <small>選擇你的卡</small>
+                  <small>Choose Your Card</small>
                 </>
               )}
             </div>
@@ -544,7 +544,7 @@ export default function BattleGame() {
                 <>
                   <span className={styles.slotQuestion} aria-hidden="true">?</span>
                   <strong>Choose Hero</strong>
-                  <small>選擇你的卡</small>
+                  <small>Choose Your Card</small>
                 </>
               )}
             </div>
@@ -552,7 +552,7 @@ export default function BattleGame() {
               <span className={styles.slotPlayer}>ROOM</span>
               <span className={styles.roomSlotCode} aria-hidden="true">####</span>
               <strong>LAN Battle</strong>
-              <small>建立或輸入房號</small>
+              <small>Create or enter a room code</small>
             </div>
           </>
         ) : (["A", "B"] as const).map((player) => {
@@ -585,7 +585,7 @@ export default function BattleGame() {
                 <>
                   <span className={styles.slotQuestion} aria-hidden="true">?</span>
                   <strong>Empty Slot</strong>
-                  <small>尚未出卡</small>
+                  <small>No Card Yet</small>
                 </>
               )}
             </button>
@@ -674,8 +674,8 @@ export default function BattleGame() {
                     <small lang="zh-Hant">{npc.name}</small>
                     <i>
                       {npc.npcStrategy === "apprentice"
-                        ? "Random picks · 入門"
-                        : "Greedy picks · 魔王"}
+                        ? "Random picks · Apprentice"
+                        : "Greedy picks · Boss"}
                     </i>
                   </span>
                 </button>
@@ -697,7 +697,7 @@ export default function BattleGame() {
               className="sticker-button sticker-button-secondary"
             >
               <span>Draw New</span>
-              <small>現場抽一張</small>
+              <small>Draw One Now</small>
             </Link>
           </div>
         </>
@@ -708,7 +708,7 @@ export default function BattleGame() {
             className="sticker-button sticker-button-secondary"
           >
             <span>Draw New</span>
-            <small>現場抽一張</small>
+            <small>Draw One Now</small>
           </Link>
           <button
             type="button"
@@ -725,10 +725,10 @@ export default function BattleGame() {
             </span>
             <small>
               {mode === "quick"
-                ? "開始快速對戰"
+                ? "Start Quick Battle"
                 : activePlayer === "A"
-                  ? "鎖定並交機"
-                  : "開始對戰"}
+                  ? "Lock In & Pass"
+                  : "Start Battle"}
             </small>
           </button>
         </div>
@@ -739,10 +739,10 @@ export default function BattleGame() {
           <p className={styles.eyebrow}>PLAYER 1 LOCKED IN</p>
           <div className={styles.handoffIcon} aria-hidden="true">↝</div>
           <h2 id="handoff-title">Pass to Player 2</h2>
-          <p lang="zh-Hant">把手機交給玩家 2，準備選擇第二張出戰卡。</p>
+          <p>Hand the phone to Player 2, ready to choose the second card.</p>
           <button type="button" onClick={passToPlayerTwo} autoFocus className="sticker-button sticker-button-primary">
             <span>I&apos;m Player 2</span>
-            <small>玩家 2 準備好了</small>
+            <small>Player 2 Ready</small>
           </button>
         </div>
       )}

@@ -18,12 +18,12 @@ const ROOM_POLL_MS = 1_500;
 const REVEAL_DURATION_MS = 1_800;
 
 const STAT_LABELS: Readonly<Record<StatKey, { label: string; name: string }>> = {
-  hp: { label: "HP", name: "生命" },
-  mp: { label: "MP", name: "魔力" },
-  def: { label: "DEF", name: "防禦" },
-  agi: { label: "AGI", name: "敏捷" },
-  luk: { label: "LUK", name: "幸運" },
-  grit: { label: "GRT", name: "韌性" },
+  hp: { label: "HP", name: "Health" },
+  mp: { label: "MP", name: "Mana" },
+  def: { label: "DEF", name: "Defense" },
+  agi: { label: "AGI", name: "Agility" },
+  luk: { label: "LUK", name: "Luck" },
+  grit: { label: "GRT", name: "Grit" },
 };
 
 interface ApiErrorBody {
@@ -41,21 +41,21 @@ export function nextRoundToAnimate(
 export function onlineRoomErrorMessage(code?: string): string {
   switch (code) {
     case "ROOM_FULL":
-      return "房間已滿 · Room full. 換個房號，或建立新房再戰。";
+      return "Room full. Try a different code, or create a new room.";
     case "ROOM_NOT_FOUND":
-      return "找不到房間 · Room not found. 檢查四位數房號，或建立新房。";
+      return "Room not found. Check the 4-digit code, or create a new room.";
     case "ROOM_EXPIRED":
-      return "房間已過期 · Room expired. 建立新房就能重新開戰。";
+      return "Room expired. Create a new room to play again.";
     case "UNAUTHORIZED":
-      return "玩家連結失效 · Player link expired. 返回大廳重新加入。";
+      return "Player link expired. Return to the lobby and rejoin.";
     case "OUT_OF_TURN":
-      return "回合剛剛換人 · Turn changed. 戰況會自動更新。";
+      return "Turn changed. The battle will update automatically.";
     case "STAT_USED":
-      return "這項能力用過了 · Stat already used. 請挑另一項。";
+      return "Stat already used. Please choose another.";
     case "OPPONENT_CONNECTED":
-      return "對手回來了 · Opponent reconnected. 繼續對戰吧。";
+      return "Opponent reconnected. Continue the battle.";
     default:
-      return "連不上房間 · Could not reach the room. 檢查網路後重試，或返回大廳。";
+      return "Could not reach the room. Check your connection and retry, or return to the lobby.";
   }
 }
 
@@ -114,7 +114,7 @@ export function OnlineBattleScreen({
         <aside className={styles.onlineError} role="alert">
           <p>{error}</p>
           <button type="button" onClick={onLeave}>
-            返回大廳 · Back to Lobby
+            Back to Lobby
           </button>
         </aside>
       )}
@@ -131,7 +131,7 @@ export function OnlineBattleScreen({
             <div className={styles.onlineEmptyFighter}>
               <span aria-hidden="true">?</span>
               <strong>Player 2</strong>
-              <small>等待加入</small>
+              <small>Waiting to join</small>
             </div>
           </div>
         </section>
@@ -186,7 +186,7 @@ export function OnlineBattleScreen({
                       onClick={() => onPick(stat)}
                     >
                       <strong>{STAT_LABELS[stat].label} {room.cards[room.player]!.stats[stat]}</strong>
-                      <small>{available ? STAT_LABELS[stat].name : "已使用"}</small>
+                      <small>{available ? STAT_LABELS[stat].name : "Used"}</small>
                     </button>
                   );
                 })}
@@ -198,7 +198,7 @@ export function OnlineBattleScreen({
             <aside className={styles.disconnectNotice} role="status">
               <div>
                 <strong>Opponent disconnected</strong>
-                <small>對手超過 30 秒未回應</small>
+                <small>Opponent unresponsive for 30+ seconds</small>
               </div>
               <button type="button" onClick={onForfeit} disabled={pending}>
                 Claim Forfeit
@@ -252,7 +252,7 @@ function RoundReveal({ round }: { round: BattleRound }) {
   return (
     <div className={styles.onlineRevealBackdrop} role="status" aria-live="assertive">
       <section className={styles.onlineReveal}>
-        <p>REVEAL! · 同時揭曉</p>
+        <p>REVEAL!</p>
         <div>
           {(["A", "B"] as const).map((player) => {
             const pick = round.picks[player];
@@ -267,7 +267,7 @@ function RoundReveal({ round }: { round: BattleRound }) {
         </div>
         <strong>
           {round.winner === "tie"
-            ? "TIE · 平手"
+            ? "TIE"
             : `PLAYER ${round.winner === "A" ? "1" : "2"} WINS ROUND`}
         </strong>
       </section>
@@ -297,8 +297,8 @@ function OnlineResult({
         {room.winReason === "forfeit" && (
           <p className={styles.classSubtitle}>
             {didWin
-              ? "Win by forfeit · 對手離線，這局由你收下"
-              : "你離線太久，對手取得勝利 · Opponent claimed the forfeit"}
+              ? "Win by forfeit. Opponent disconnected, you take this round."
+              : "Opponent claimed the forfeit after you disconnected too long."}
           </p>
         )}
         <p className={styles.finalScore}>
@@ -307,7 +307,7 @@ function OnlineResult({
         <div className={styles.resultActions}>
           <button type="button" onClick={onLeave} className="sticker-button sticker-button-primary">
             <span>Back to Lobby</span>
-            <small>返回選角</small>
+            <small>Return to Selection</small>
           </button>
         </div>
       </section>
@@ -417,12 +417,12 @@ export default function OnlineBattle({ code, token, onLeave }: OnlineBattleProps
           <div className={`${styles.canvasLoading} ${styles.connectionError}`} role="alert">
             <p>{error}</p>
             <button type="button" onClick={onLeave}>
-              返回大廳 · Back to Lobby
+              Back to Lobby
             </button>
           </div>
         ) : (
           <div className={styles.canvasLoading} role="status">
-            同步戰況中… · Syncing server battle state…
+            Syncing server battle state…
           </div>
         )}
       </main>

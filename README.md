@@ -111,12 +111,11 @@ Rate limiting (250 requests / 300s per IP and per token) is far above our per-us
 
 ---
 
-## What FaceForge does NOT do
+## Design Philosophy
 
-- **Not a medical or dermatological tool.** The YouCam Skin Analysis API is a consumer-grade cosmetic indicator, and FaceForge deliberately runs it *outside* its calibrated conditions (extreme expressions vs. the recommended neutral, bare-faced, evenly lit selfie). Scores here are entertainment values only — never skincare advice, never a diagnosis.
-- **No biometric storage or identification.** No photo persistence, no face templates, no cross-session identity. A card cannot be reversed into a face.
-- **No score-based judgment of real skin.** The game rewards *deviation*, not "good skin." The Dewlight Paladin (all metrics ≥ 85) exists, but the meta favors the weird — by design.
-- **No offline analysis claim.** The face *gate* is local; the *analysis* is the YouCam cloud API. Fixture mode is a development replay, not an offline model.
+- **Entertainment-first skin analysis.** FaceForge repurposes the YouCam Skin Analysis API for social gaming: pull a face, get a character card, battle your friends. The game rewards *deviation* from calibrated conditions, turning what the API treats as noise into the core mechanic.
+- **Privacy by design.** No photo persistence, no face templates, no cross-session identity. Photos are analyzed in-flight and discarded. A card cannot be reversed into a face.
+- **Honest architecture.** The face *gate* (MediaPipe) runs locally to save API credits; the *analysis* is always the YouCam cloud API. Fixture mode is a development replay, not an offline model.
 
 ---
 

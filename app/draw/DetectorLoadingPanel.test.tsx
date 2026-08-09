@@ -13,9 +13,8 @@ describe("DetectorLoadingPanel", () => {
       }),
     );
 
-    expect(html).toContain("魔鏡甦醒中…");
     expect(html).toContain("Waking the mirror…");
-    expect(html).toContain("約 11 MB");
+    expect(html).toContain("about 11 MB");
     expect(html).not.toContain("Skip detection");
   });
 
@@ -27,7 +26,7 @@ describe("DetectorLoadingPanel", () => {
       }),
     );
 
-    expect(html).toContain("載入比預期久一點");
-    expect(html).toContain("略過偵測 · Skip detection");
+    expect(html).toContain("Taking longer than expected");
+    expect(html).toContain("Skip detection");
   });
 });

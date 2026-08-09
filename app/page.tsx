@@ -97,14 +97,14 @@ export function CollectionCardDetail({
             className="min-h-11 rounded-full border-2 border-ff-cream bg-ff-plum px-4 text-sm font-black shadow-[0_3px_0_var(--color-ff-cream)]"
             onClick={onClose}
           >
-            Close · 關閉
+            Close
           </button>
         </div>
         <div ref={captureRef}>
           <CharacterCard card={card} flipped={flipped} onFlip={onFlip} />
         </div>
         <p className="text-sm font-bold text-ff-cream">
-          Tap the card to flip · 點卡片翻面
+          Tap the card to flip
         </p>
         <button
           type="button"
@@ -113,8 +113,8 @@ export function CollectionCardDetail({
           onClick={() => captureRef.current && onSaveImage(captureRef.current)}
         >
           {savingImage
-            ? "Saving Image… · 圖片儲存中"
-            : "Save Card Image · 儲存卡片圖片"}
+            ? "Saving Image…"
+            : "Save Card Image"}
         </button>
         {actionError && (
           <p className="w-full rounded-xl border-2 border-ff-error bg-white px-3 py-2 text-center text-sm font-bold text-ff-error" role="alert">
@@ -180,7 +180,7 @@ export default function CollectionHome() {
       await downloadCardImage(node, selected);
     } catch {
       setActionError(
-        "卡片圖片存不下來 · Could not save the card image. 請再試一次。",
+        "Could not save the card image. Please try again.",
       );
     } finally {
       setSavingImage(false);

@@ -12,33 +12,33 @@ const ERROR_COPY: Readonly<
 > = {
   face_too_small: {
     title: "Get closer!",
-    subtitle: "臉再靠近一點！",
+    subtitle: "Your face needs to get closer!",
     detail:
-      "讓臉填滿橢圓再試一次 · Fill the oval with your face, then try again.",
+      "Fill the oval with your face, then try again.",
   },
   no_face: {
     title: "No face found!",
-    subtitle: "魔鏡找不到臉！",
+    subtitle: "The mirror can't find a face!",
     detail:
-      "請讓一張清楚、沒被遮住的臉待在畫面中央 · Keep one clear, uncovered face centered in the frame.",
+      "Keep one clear, uncovered face centered in the frame.",
   },
   file_too_large: {
     title: "That portrait is too mighty!",
-    subtitle: "這張照片能量太大了！",
+    subtitle: "This photo's energy is too strong!",
     detail:
-      "換一張較小的照片，或直接重拍 · Choose a smaller photo or take a new one.",
+      "Choose a smaller photo or take a new one.",
   },
   upstream_error: {
     title: "The mirror went cloudy!",
-    subtitle: "魔鏡起霧了！",
+    subtitle: "The mirror fogged up!",
     detail:
-      "照片還在，先再試一次；不行再重拍 · Your photo is safe. Retry, or take another one.",
+      "Your photo is safe. Retry, or take another one.",
   },
   missing_photo: {
     title: "No portrait is waiting",
-    subtitle: "還沒有照片可以占卜！",
+    subtitle: "There's no photo to divine yet!",
     detail:
-      "回到抽卡站拍一張臉照吧 · Return to the draw station and capture your face first.",
+      "Return to the draw station and capture your face first.",
   },
 };
 
@@ -65,7 +65,7 @@ export function RevealErrorPanel({
           RITUAL INTERRUPTED
         </p>
         <h1 className="mt-2 text-3xl font-black text-ff-ink">{copy.title}</h1>
-        <p className="mt-1 text-xl font-black text-ff-pink-deep" lang="zh-Hant">
+        <p className="mt-1 text-xl font-black text-ff-pink-deep">
           {copy.subtitle}
         </p>
         <p className="mx-auto mt-4 max-w-xs text-sm font-bold leading-relaxed text-ff-plum">
@@ -78,7 +78,7 @@ export function RevealErrorPanel({
               onClick={onRetry}
               className="sticker-button sticker-button-primary"
             >
-              再試一次 · Retry Ritual
+              Retry Ritual
             </button>
           )}
           <button
@@ -86,7 +86,7 @@ export function RevealErrorPanel({
             onClick={onRetake}
             className="sticker-button sticker-button-secondary"
           >
-            重拍 · Retake Photo
+            Retake Photo
           </button>
         </div>
       </section>

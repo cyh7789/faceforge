@@ -18,9 +18,9 @@ import { DetectorLoadingPanel } from "./DetectorLoadingPanel";
 import styles from "./draw.module.css";
 
 const HINTS = [
-  "Make your weirdest face! 做最怪的表情！",
-  "The stranger, the rarer! 越怪越稀有！",
-  "Face powers only! 只能用臉！",
+  "Make your weirdest face!",
+  "The stranger, the rarer!",
+  "Face powers only!",
 ] as const;
 
 const DETECTOR_SKIP_DELAY_MS = 8_000;
@@ -331,7 +331,7 @@ export default function DrawCameraPage() {
       setShotGate(gate);
       if (gate === "no-face") {
         setCaptureError(
-          "這張照片找不到臉 · No face detected. 請換一張有臉的照片再試。",
+          "No face detected. Please try another photo with a face.",
         );
       }
     } catch {
@@ -398,18 +398,18 @@ export default function DrawCameraPage() {
           : "waiting";
   const guideText =
     cameraStatus === "error"
-      ? "相機無法使用 Camera unavailable"
+      ? "Camera unavailable"
       : cameraStatus === "starting"
-        ? "啟動相機中 Starting camera…"
+        ? "Starting camera…"
         : detectorStatus === "loading"
-          ? "啟動臉部偵測中 Starting face check…"
+          ? "Starting face check…"
           : cameraGate === "degraded"
-            ? "臉部偵測暫時不可用 Face check unavailable"
+            ? "Face check unavailable"
             : cameraGate === "good"
-              ? "可以拍了 Ready"
+              ? "Ready"
               : cameraGate === "too-small"
-                ? "再靠近一點 Get closer"
-                : "找不到臉 Find your face";
+                ? "Get closer"
+                : "Find your face";
 
   if (shot) {
     return (
@@ -434,12 +434,12 @@ export default function DrawCameraPage() {
           {shot.source === "upload" ? (
             <p className="text-center text-sm font-bold text-ff-plum" role="status">
               {uploadChecking
-                ? "確認照片中 Checking for a face…"
+                ? "Checking for a face…"
                 : shotGate === "good"
-                  ? "找到臉了 · Face detected"
+                  ? "Face detected"
                   : shotGate === "degraded"
-                    ? "臉部偵測暫時不可用 · Face check unavailable"
-                    : "這張找不到臉 · Choose another photo with a face"}
+                    ? "Face check unavailable"
+                    : "Choose another photo with a face"}
             </p>
           ) : (
             <p className="text-center text-sm font-bold text-ff-plum">
@@ -448,7 +448,7 @@ export default function DrawCameraPage() {
           )}
           {shotGate === "degraded" && (
             <p className="mx-auto mt-2 w-fit rounded-full border border-ff-pink-deep bg-white px-2 py-1 text-center text-[10px] font-black text-ff-pink-deep">
-              偵測降級 · Check skipped
+              Check skipped
             </p>
           )}
           {captureError && (
@@ -463,7 +463,7 @@ export default function DrawCameraPage() {
               disabled={submitting}
               className="sticker-button sticker-button-secondary"
             >
-              {shot.source === "upload" ? "換一張 · Choose Another" : "重拍 · Retake"}
+              {shot.source === "upload" ? "Choose Another" : "Retake"}
             </button>
             <button
               type="button"
@@ -475,7 +475,7 @@ export default function DrawCameraPage() {
                 ? "Checking…"
                 : submitting
                   ? "Preparing…"
-                  : "問魔鏡 · Consult Mirror"}
+                  : "Consult Mirror"}
             </button>
           </div>
         </section>
@@ -541,7 +541,7 @@ export default function DrawCameraPage() {
         )}
         {cameraStatus === "error" && (
           <p className="mb-3 text-center text-sm font-bold text-ff-cream">
-            相機無法使用 · Camera unavailable. 請改從相簿選照片。
+            Camera unavailable. Please choose a photo from your album instead.
           </p>
         )}
         <button
@@ -562,7 +562,7 @@ export default function DrawCameraPage() {
           or choose from album
         </button>
         <p className={styles.albumHint}>
-          相簿裡沒有傳說 · No legendaries in your album
+          No legendaries in your album
         </p>
         <input
           ref={fileInputRef}

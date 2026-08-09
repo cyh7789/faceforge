@@ -55,7 +55,7 @@ export function OnlineRoomControls({
           <p>{error}</p>
           {card && (
             <button type="button" onClick={onCreate} disabled={pending}>
-              建立新房 · Create New Room
+              Create New Room
             </button>
           )}
         </div>
@@ -63,7 +63,7 @@ export function OnlineRoomControls({
       <div className={styles.onlineLobbyActions}>
         <button type="button" onClick={onCreate} disabled={!card || pending}>
           <strong>Create Room</strong>
-          <small>建立四位數房號</small>
+          <small>Generate a 4-digit code</small>
         </button>
         <span>OR</span>
         <div>
@@ -84,7 +84,7 @@ export function OnlineRoomControls({
             disabled={!card || joinCode.length !== 4 || pending}
           >
             <strong>Join Room</strong>
-            <small>輸入房號加入</small>
+            <small>Enter a code to join</small>
           </button>
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function OnlineRoomLobby({
       return;
     }
     if (kind === "join" && !/^\d{4}$/.test(joinCode)) {
-      setError("房號要四位數 · Enter a 4-digit room code.");
+      setError("Enter a 4-digit room code.");
       return;
     }
 
