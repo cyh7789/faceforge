@@ -18,28 +18,29 @@
 
 > 旁白正本＝`scripts/make-vo.sh` 內的字串（TTS 實際讀的就是它）。本表由該檔同步。
 > 語音：`en-US-AvaMultilingualNeural`（與 ASTRA 同一把女聲），語速 +8%。
+> 相機畫面用 Chromium 假攝影機（`--use-file-for-fake-video-capture`）餵 y4m，走的是真正的 gate 與快門邏輯。
 
 | # | 時間 | 畫面 | 旁白 |
 |---|------|------|------|
-| 01 | 0:00–0:03 | 街機開場：兩張鬼臉左右滑入，VS 撞擊 + 震動 | Two ugly faces. One winner. |
-| 02 | 0:03–0:11 | 首頁 FACEFORGE 標題 + 空的 15 宮格圖鑑 | Skin analysis apps grade your face and tell you what to fix. FaceForge takes the same scores and forges a fighter out of them. |
-| 03 | 0:11–0:24 | 左右分割同步：P1 與 P2 各自上傳 → 本地 face gate 亮 Face detected → Consult Mirror | Two players, one phone, side by side. A local face detector confirms each face before anything leaves the device. Then the YouCam Skin Analysis API scores fifteen skin metrics for each player. |
-| 04 | 0:24–0:37 | 左右分割同步：兩張卡同時翻開（RARE vs LEGENDARY），中央 VS 分隔 | Your worst metric picks your class. Pores at fifty forges the Crater Warden. Droopy eyelids crown the Drooping Regent. Six battle stats come straight out of the raw scores, and the mirror has opinions about both of you. |
-| 06 | 0:37–0:53 | 圖鑑兩格點亮 → 點卡 → 翻面看星座卡背 | Fifteen classes to unlock, one for every metric the API scores. The API is deterministic to fourteen decimal places, so the same face always forges the same card. Flip it, and the back draws your own wrinkle constellation. |
-| 07 | 0:53–0:59 | Battle → 2 Players → 選卡 → Lock P1 → 交接 → Enter Arena | Now put that face in the ring. Pick your fighter, lock it in, pass the phone. Best of three. |
-| 08 | 0:59–1:11 | BO3 三回合快切：選 stat → REVEAL → hit-stop → 結果與 roast（裁成 canvas 區放大） | Round one. Pick a stat, hope yours is higher. Round two. Round three. Loser gets roasted by the mirror. Every number on screen came out of a real API response. |
-| 09 | 1:11–1:27 | 上傳無臉照 → 本地 gate 擋下 → Consult Mirror 變灰，零 unit 消耗 | Everything here is built on measured API behavior. Bad photos cost seventy-eight seconds of silent retries, so the face gate stops them locally and saves credits. The flattering UI scores hide the interesting signal, so the whole engine runs on raw scores. |
-| 10 | 1:27–1:33 | 回圖鑑收尾 | Skin analysis tells you your face is flawed. FaceForge says your face is legendary. |
+| 01 | 0:00–0:04 | 街機開場：兩張鬼臉左右滑入，VS 撞擊 + 震動 | Two ugly faces. One winner. |
+| 02 | 0:04–0:12 | 首頁 FACEFORGE 標題 + 空的 15 宮格圖鑑 | Skin analysis apps grade your face and tell you what to fix. FaceForge takes the same scores and forges a fighter out of them. |
+| 03 | 0:12–0:26 | 左右分割同步：P1 相機即時預覽（綠框 Ready → 按快門），P2 相簿上傳（Face detected） | Two players, one phone, side by side. One shoots on camera, one picks from the album. A local face detector clears each face before anything leaves the device, then the YouCam Skin Analysis API scores fifteen skin metrics. |
+| 04 | 0:26–0:39 | 左右分割同步：兩張卡同時翻開（RARE vs LEGENDARY），中央 VS 分隔 | Your worst metric picks your class. Pores at fifty forges the Crater Warden. Droopy eyelids crown the Drooping Regent. Six battle stats come straight out of the raw scores, and the mirror has opinions about both of you. |
+| 06 | 0:39–0:55 | 圖鑑兩格點亮 → 點卡 → 翻面看星座卡背 | Fifteen classes to unlock, one for every metric the API scores. The API is deterministic to fourteen decimal places, so the same face always forges the same card. Flip it, and the back draws your own wrinkle constellation. |
+| 07 | 0:55–1:01 | Battle → 2 Players → 選卡 → Lock P1 → 交接 → Enter Arena | Now put that face in the ring. Pick your fighter, lock it in, pass the phone. Best of three. |
+| 08 | 1:01–1:13 | BO3 三回合快切：選 stat → REVEAL → hit-stop → 結果與 roast（裁成 canvas 區放大） | Round one. Pick a stat, hope yours is higher. Round two. Round three. Loser gets roasted by the mirror. Every number on screen came out of a real API response. |
+| 09 | 1:13–1:33 | 鏡頭對著沒有臉的畫面：紅框、Find your face、快門變灰 → 再上傳無臉照，同樣被本地擋下 | Everything here is built on measured API behavior. Point the camera at anything without a face and the shutter stays locked. Bad photos cost seventy-eight seconds of silent retries, so the gate stops them on the device and spends nothing. The flattering UI scores hide the interesting signal, so the whole engine runs on raw scores. |
+| 10 | 1:33–1:39 | 回圖鑑收尾 | Skin analysis tells you your face is flawed. FaceForge says your face is legendary. |
 
 ## 產出鏈
 
 1. `bash scripts/make-vo.sh` — 生 TTS 分段並印長度
-2. `node scripts/record-demo.mjs` — Playwright 走完流程，錄 webm + 寫 marks.json（需先 `next build && next start`）
+2. `node scripts/record-demo.mjs` — Playwright 走完流程，錄主片與 gate 片並各寫 marks.json（需先 `next build && next start`，並先產生 `video-assets/fakecam/*.y4m`）
 3. `python3 scripts/make_intro.py` — 街機開場卡
 4. `python3 scripts/build_video.py` — 依 marks 切段、對齊旁白、套側欄、串接
 5. `node scripts/shoot-screenshots.mjs` — Devpost 用五張截圖
 
-成品：`video-assets/faceforge-demo.mp4`（88.1 秒，1920x1080，真 API 錄製）
+成品：`video-assets/faceforge-demo.mp4`（94.3 秒，1920x1080，真 API 錄製）
 
 ## 錄製規格
 

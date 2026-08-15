@@ -38,13 +38,21 @@ async function pickStat(page, index) {
   await clickCanvasPoint(page, cx, cy);
 }
 
-async function drawCard(page, imagePath, label, markId, showBack = false) {
+async function drawCard(page, imagePath, label, markId, useCamera = false) {
   await page.goto(`${BASE_URL}/draw`);
   await page.waitForSelector("#face-upload", { state: "attached" });
-  await beat(1500);
-  await page.setInputFiles("#face-upload", imagePath);
-  await page.waitForSelector("text=Face detected", { timeout: 30_000 });
-  await beat(1200);
+  if (useCamera) {
+    // 假攝影機餵入人臉，等本地 gate 判定 Ready 後按快門
+    await page.waitForSelector("[role='status']:has-text('Ready')", { timeout: 30_000 });
+    await beat(2600);
+    await page.click("button[aria-label^='Take photo']");
+    await beat(1600);
+  } else {
+    await beat(1500);
+    await page.setInputFiles("#face-upload", imagePath);
+    await page.waitForSelector("text=Face detected", { timeout: 30_000 });
+    await beat(1200);
+  }
   await page.click("text=Consult Mirror");
   // 魔鏡動畫 + 真 API（實測 5 秒上下）→ 卡片就緒後停在背面等玩家翻
   await page.waitForSelector("text=Tap to reveal", { timeout: 90_000 });
@@ -52,12 +60,6 @@ async function drawCard(page, imagePath, label, markId, showBack = false) {
   mark(`${markId}_card`);
   await page.click("button[aria-label^='Reveal card']");
   await beat(11000);
-  if (showBack) {
-    await page.click("text=View Card Back");
-    await beat(3800);
-    await page.click("button[aria-label^='Reveal card']");
-    await beat(1500);
-  }
   await page.click("text=Save to Collection");
   await page.waitForURL((url) => !url.pathname.includes("reveal"), { timeout: 15_000 });
   await beat(1500);
@@ -67,13 +69,17 @@ async function drawCard(page, imagePath, label, markId, showBack = false) {
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   const browser = await chromium.launch({
-    args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
+    args: [
+      "--use-fake-ui-for-media-stream",
+      "--use-fake-device-for-media-stream",
+      `--use-file-for-fake-video-capture=${path.resolve("video-assets/fakecam/p1.y4m")}`,
+    ],
   });
   const context = await browser.newContext({
     viewport: { width: 430, height: 932 },
     deviceScaleFactor: 2,
     recordVideo: { dir: OUT_DIR, size: { width: 430, height: 932 } },
-    permissions: [],
+    permissions: ["camera"],
   });
   const page = await context.newPage();
   page.on("console", (m) => m.type() === "error" && console.log("PAGE ERR:", m.text()));
@@ -88,7 +94,7 @@ async function main() {
 
   // 2-3. 兩位玩家抽卡
   mark("draw1");
-  await drawCard(page, P1, "player 1", "draw1");
+  await drawCard(page, P1, "player 1", "draw1", true);
   await page.goto(BASE_URL);
   await beat(1500);
   mark("draw2");
@@ -141,16 +147,7 @@ async function main() {
   }
   await beat(6000);
 
-  // 6. 額度防火牆：無臉照被本地 gate 擋下，不會送到 API
-  mark("gate");
-  await page.goto(`${BASE_URL}/draw`);
-  await page.waitForSelector("#face-upload", { state: "attached" });
-  await beat(2000);
-  await page.setInputFiles("#face-upload", path.resolve("video-assets/no-face.jpg"));
-  await page.waitForSelector("text=Choose another photo with a face", { timeout: 30_000 });
-  await beat(13000);
-
-  // 7. 收尾：回圖鑑
+  // 6. 收尾：回圖鑑
   mark("outro");
   await page.goto(BASE_URL);
   await beat(7000);
@@ -159,7 +156,43 @@ async function main() {
   writeFileSync(path.join(OUT_DIR, "marks.json"), JSON.stringify(marks, null, 2));
   await context.close();
   await browser.close();
+
+  await recordGate();
   console.log("recorded to", OUT_DIR);
+}
+
+// 額度防火牆：鏡頭對著沒有臉的東西時，快門是鎖的；相簿裡的無臉照也被本地擋下。
+async function recordGate() {
+  const dir = `${OUT_DIR}-gate`;
+  mkdirSync(dir, { recursive: true });
+  const browser = await chromium.launch({
+    args: [
+      "--use-fake-ui-for-media-stream",
+      "--use-fake-device-for-media-stream",
+      `--use-file-for-fake-video-capture=${path.resolve("video-assets/fakecam/noface.y4m")}`,
+    ],
+  });
+  const context = await browser.newContext({
+    viewport: { width: 430, height: 932 },
+    recordVideo: { dir, size: { width: 430, height: 932 } },
+    permissions: ["camera"],
+  });
+  const page = await context.newPage();
+  const gateMarks = [];
+  await page.goto(`${BASE_URL}/draw`);
+  await page.waitForSelector("#face-upload", { state: "attached" });
+  const start = Date.now();
+  gateMarks.push({ label: "camera_blocked", at: 0 });
+  await beat(9000);
+  await page.setInputFiles("#face-upload", path.resolve("video-assets/no-face.jpg"));
+  await page.waitForSelector("text=Choose another photo with a face", { timeout: 30_000 });
+  gateMarks.push({ label: "upload_blocked", at: (Date.now() - start) / 1000 });
+  await beat(11000);
+  gateMarks.push({ label: "end", at: (Date.now() - start) / 1000 });
+  writeFileSync(path.join(dir, "marks.json"), JSON.stringify(gateMarks, null, 2));
+  await context.close();
+  await browser.close();
+  console.log("gate clip recorded");
 }
 
 main().catch((error) => {

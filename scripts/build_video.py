@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 W, H, FPS = 1920, 1080, 30
 RAW = pathlib.Path("video-assets/raw")
+RAW_GATE = pathlib.Path("video-assets/raw-gate")
 VO = pathlib.Path("video-assets/vo")
 BUILD = pathlib.Path("video-assets/build")
 PHONE_H = 1000
@@ -34,7 +35,7 @@ SEGMENTS = [
     ("06", "collection", "ALBUM", ["Wrinkle constellation", "Drawn from your scan", "Card back art"]),
     ("07", "battle", "READY", ["Best of three", "Stat duel", "Same device 2P"]),
     ("08", "rounds", "FIGHT", ["Six stats per card", "All from raw scores", "Loser gets roasted"], 0.0, 0.80),
-    ("09", "gate", "CREDIT FIREWALL", ["78s wasted per bad photo", "Blocked on device", "Zero units spent"], 4.5, None),
+    ("09", "camera_blocked", "CREDIT FIREWALL", ["Shutter stays locked", "78s wasted per bad photo", "Zero units spent"], 0.0, None),
     ("10", "outro", "FACEFORGE", ["Your face is legendary", "youcam skin analysis api", ""]),
 ]
 
@@ -87,11 +88,14 @@ def main() -> None:
     BUILD.mkdir(parents=True, exist_ok=True)
     source = next(RAW.glob("*.webm"))
     marks = {m["label"]: m["at"] for m in json.loads((RAW / "marks.json").read_text())}
+    gate_source = next(RAW_GATE.glob("*.webm"))
+    gate_marks = {m["label"]: m["at"] for m in json.loads((RAW_GATE / "marks.json").read_text())}
 
 
     # 分割畫面段：左 = player 1 抽卡流程，右 = player 2，兩邊同時跑
     split_len = min(marks["draw2"] - marks["draw1"], marks["collection"] - marks["draw2"])
     order = [("draw1" if s[1] == "SPLIT" else s[1]) for s in SEGMENTS] + ["end"]
+    order = [("outro" if o == "camera_blocked" else o) for o in order]
     parts = []
     for index, spec in enumerate(SEGMENTS):
         vo_id, mark_name, title, lines = spec[:4]
@@ -99,6 +103,7 @@ def main() -> None:
         crop = spec[5] if len(spec) > 5 else None
         vo_path = VO / f"{vo_id}.mp3"
         want = duration(vo_path) + 0.45
+        is_gate = mark_name in gate_marks
         is_split = mark_name == "SPLIT"
         if is_split:
             start = marks["draw1"] + offset
@@ -106,6 +111,9 @@ def main() -> None:
             nxt_is_split = bool(nxt_spec) and nxt_spec[1] == "SPLIT"
             end_at = nxt_spec[4] if nxt_is_split else split_len
             avail = end_at - offset
+        elif is_gate:
+            start = gate_marks[mark_name] + offset
+            avail = gate_marks["end"] - start
         else:
             start = marks[mark_name] + offset
             nxt = order[index + 1]
@@ -141,8 +149,9 @@ def main() -> None:
                 f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=0x1b0f22[base];"
                 f"[base][1:v]overlay=0:0[v]"
             )
+            clip = gate_source if is_gate else source
             inputs = [
-                "-ss", f"{start:.2f}", "-t", f"{take:.2f}", "-i", str(source),
+                "-ss", f"{start:.2f}", "-t", f"{take:.2f}", "-i", str(clip),
                 "-i", str(side), "-i", str(vo_path),
             ]
             audio_map = "2:a"
