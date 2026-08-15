@@ -93,6 +93,41 @@ next.js, typescript, tailwind-css, youcam-skin-analysis-api, mediapipe, phaser, 
 - GitHub: https://github.com/cyh7789/faceforge
 - Demo video: (YouTube link, pending upload)
 
+## YouTube upload
+
+Settings: **Public** (rules require publicly visible), no music track, no third-party trademarks. Upload `video-assets/faceforge-demo.srt` as English captions and `video-assets/faceforge-thumbnail.png` as the custom thumbnail.
+
+**Title**
+
+FaceForge: your worst skin score forges a legendary card | YouCam Skin Analysis API Hackathon
+
+**Description**
+
+Skin analysis apps grade your face and tell you what to fix. FaceForge takes the same scores and forges a fighter out of them.
+
+Pull the weirdest face you can. A locally hosted MediaPipe face detector clears the shot before anything leaves the device, then the YouCam Skin Analysis API scores 15 skin metrics. Your weakest metric picks your RPG class, your strongest becomes your talent, six battle stats come out of the raw scores, and the mirror roasts you for whichever one let you down. Collect 15 classes, then duel a friend on the same phone, best of three.
+
+Everything on screen is a live run against the API. The rarity thresholds, class mapping and stat formulas were all measured from real responses before the game existed: one face pulling five expressions moved the summed deviation across all 15 metrics from 47 to 239, and the API is deterministic to 14 decimal places, so the same face always forges the same card.
+
+Built for the YouCam API Skin AI & Apparel VTO Hackathon by Perfect Corp.
+
+Code: https://github.com/cyh7789/faceforge
+
+Chapters:
+0:00 Two faces enter
+0:02 What FaceForge does
+0:10 Both players scan at once
+0:24 Cards forged from 15 metrics
+0:36 Collection and constellation backs
+0:51 Into the arena
+0:57 Best-of-three stat duel
+1:09 The credit firewall
+1:27 Closing
+
+**Tags**
+
+youcam api, perfect corp, skin analysis, hackathon, devpost, ai, card game, mediapipe, nextjs, phaser, computer vision, web game
+
 ## Devpost form: text description (paste as one field)
 
 FaceForge is a mobile web card game where your face is the controller, built on the YouCam Skin Analysis API.
@@ -131,10 +166,16 @@ Two, and neither one is a beauty product.
 
 Photo quality, twice, in opposite directions. Framing a face too small returns one error, and framing it so it fills the frame returns another, `error_src_face_out_of_bound`, which our proxy had been folding into a generic failure so the player saw "the mirror went cloudy" with nothing to act on. We now map it to its own status with a message that says to back off. The larger fix sits earlier in the pipeline: MediaPipe BlazeFace runs locally as a self-hosted WASM build, so photos without a clear face never leave the device, never spend a unit, and never trigger the 78-second retry path. The same discipline covered development itself. Every real API response is committed as a fixture and replayed offline, which is how the whole game was designed and built on 90 of our 1,000 units, with live calls saved for integration checks and filming.
 
-## Screenshots (for Devpost)
+## Gallery images (upload from video-assets/gallery/, in this order)
 
-1. Draw screen with the local face gate confirming a face
-2. Card reveal: class, rarity, six stats, talent, curse, roast
-3. Collection grid with unlocked classes
-4. Battle: stat duel mid-reveal with hit-stop
-5. Card back: the wrinkle constellation drawn from the analysis
+Each slide is 1920x1080 with the point set in display type, so it still reads at thumbnail size.
+
+1. `01-face-gate.png` — the local gate runs before any API call
+2. `02-card-reveal.png` — worst metric becomes the class
+3. `07-credit-firewall.png` — a faceless photo is blocked on device
+4. `05-battle.png` — stat duel, best of three
+5. `06-battle-result.png` — match winner and the roast on the loser
+6. `03-card-back.png` — constellation drawn from the wrinkle readings
+7. `04-collection.png` — 15 classes, one per metric
+
+Raw phone screenshots stay in `video-assets/screenshots/` if a plain shot is wanted instead.
