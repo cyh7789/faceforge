@@ -57,11 +57,9 @@ next-env.d.ts
 /.agents/
 /video-assets/fakecam/
 
-# 開發過程檔案，不進參賽 repo
-/prompt-batch*.md
-/AGENTS.md
-/CLAUDE.md
+# 開發過程檔案：實體已移到 ../faceforge-internal/
 /video-assets/screenshots/
+tsconfig.tsbuildinfo
 
 # 交件物與製作素材：交件物在 ../faceforge-submission/，產線腳本與素材不進參賽 repo
 /submission/
