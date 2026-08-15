@@ -86,12 +86,36 @@ An analysis API's least flattering output is its most playable one. The scores a
 
 ## Built With
 
-next.js, typescript, tailwind-css, youcam-skin-analysis-api, mediapipe, phaser, vercel
+next.js, typescript, tailwind-css, youcam-skin-analysis-api, mediapipe, phaser, vitest
 
 ## Links
 
 - GitHub: https://github.com/cyh7789/faceforge
 - Demo video: (YouTube link, pending upload)
+
+## Devpost form: Additional info answers
+
+**Submitter type**: Individual
+**Country of residence**: Taiwan
+**App Status**: New app, built during the hackathon
+**What date did you start this project?**: 07-16-26 (first commit)
+**If existing, explain what you updated**: not applicable, the project was started for this hackathon
+
+**Was there a moment during the hackathon where the API surprised you, in a good or frustrating way?**
+
+Both, and they turned out to be the same property. The frustrating half came first: a badly framed photo does not fail fast. It gets retried silently for 78 seconds before returning an internal error, and an occluded face gets scored with no quality warning at all, so the client cannot tell a good reading from a bad one. The good half is that the model is exactly reproducible. Re-submitting the same image returns scores identical to 14 decimal places, which is what let us promise players that the same face always forges the same card. We could build a collectible identity on top of the API without storing a single photo or biometric ourselves.
+
+**Are there industries or use cases you think Perfect Corp.'s API could serve that nobody is talking about yet?**
+
+Two, both of which come from treating skin analysis as an input device rather than as a diagnosis.
+
+First, entertainment and live events. The 15 raw metrics are a rich, player-controllable signal: in our own measurements, one face pulling five expressions moved the summed deviation from 47 to 239. That is enough range to drive a game, a photo booth, or an on-stage interactive, and it puts the API in front of people who would never open a skincare scanner.
+
+Second, stateless identity for campaigns. Because the scores are deterministic to 14 decimal places, a hash of the raw vector works as a per-face token for things like one-entry-per-person giveaways or returning-visitor detection, without the operator ever storing a photo or a face embedding. The privacy story is unusually clean for that class of problem.
+
+**Where did you hit a wall technically? How did you work around it?**
+
+Photo quality, twice, in opposite directions. Framing a face too small returns one error, and framing it so it fills the frame returns another, `error_src_face_out_of_bound`, which our proxy had been folding into a generic failure so the player saw "the mirror went cloudy" with nothing to act on. We now map it to its own status with a message that says to back off. The larger fix sits earlier in the pipeline: MediaPipe BlazeFace runs locally as a self-hosted WASM build, so photos without a clear face never leave the device, never spend a unit, and never trigger the 78-second retry path. The same discipline covered development itself. Every real API response is committed as a fixture and replayed offline, which is how the whole game was designed and built on 90 of our 1,000 units, with live calls saved for integration checks and filming.
 
 ## Screenshots (for Devpost)
 
