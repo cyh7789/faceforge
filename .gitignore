@@ -42,3 +42,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env.local
+
+# demo video 中間產物（成品與截圖仍入庫）
+/video-assets/raw/
+/video-assets/build/
+/video-assets/vo/
+
+# 內部策略文件，不進公開 repo
+/CORRECTION-PLAN.md
+/HANDOFF.md
+/faceforge-correction-r1.md
+/prompt-batch*.md
+/VIDEO-RECORDING-PROMPT.md
+/.agents/
