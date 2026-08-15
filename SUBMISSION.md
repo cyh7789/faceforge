@@ -168,14 +168,12 @@ Photo quality, twice, in opposite directions. Framing a face too small returns o
 
 ## Gallery images (upload from video-assets/gallery/, in this order)
 
-Each slide is 1920x1080 with the point set in display type, so it still reads at thumbnail size.
+Five slides, architecture first. Each is 1920x1080 with the point set in display type, so it still reads at thumbnail size.
 
-1. `01-face-gate.png` — the local gate runs before any API call
-2. `02-card-reveal.png` — worst metric becomes the class
-3. `07-credit-firewall.png` — a faceless photo is blocked on device
-4. `05-battle.png` — stat duel, best of three
-5. `06-battle-result.png` — match winner and the roast on the loser
-6. `03-card-back.png` — constellation drawn from the wrinkle readings
-7. `04-collection.png` — 15 classes, one per metric
+1. `00-architecture.png` — how one selfie becomes a card, and why the gate sits before the API
+2. `02-card-reveal.png` — the weakest metric becomes the class
+3. `07-credit-firewall.png` — a faceless photo is blocked on device, zero units spent
+4. `06-battle-result.png` — match winner, and the roast naming the metric that lost
+5. `04-collection.png` — 15 classes, one per metric the API scores
 
-Raw phone screenshots stay in `video-assets/screenshots/` if a plain shot is wanted instead.
+`01-face-gate.png`, `03-card-back.png` and `05-battle.png` are built too, if more slots are wanted. Raw phone screenshots stay in `video-assets/screenshots/`.
