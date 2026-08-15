@@ -22,7 +22,7 @@ FaceForge is a card battler where your face is the controller.
 
 Take a selfie with the most extreme expression you can manage. A local face detector confirms a real face is in frame, then the YouCam Skin Analysis API scores 15 skin metrics. FaceForge reads those scores as character generation:
 
-- **Your worst metric becomes your class.** Pores at 50 forges the Crater Warden. Dark circles forge the Night Assassin. There are 15 classes, one per metric.
+- **Your worst metric becomes your class.** The weakest pore score forges the Crater Warden. Dark circles forge the Night Assassin. There are 15 classes, one per metric.
 - **Your best metric becomes your talent**, and six battle stats are derived from the raw scores.
 - **Weirdness sets rarity.** Weirdness is the summed absolute deviation of all 15 raw metrics from a neutral baseline, so the further you push your expression away from a normal selfie, the rarer the card.
 - **The mirror roasts you**, using your worst metric by name.
@@ -103,15 +103,17 @@ next.js, typescript, tailwind-css, youcam-skin-analysis-api, mediapipe, phaser, 
 
 **Was there a moment during the hackathon where the API surprised you, in a good or frustrating way?**
 
-Both, and they turned out to be the same property. The frustrating half came first: a badly framed photo does not fail fast. It gets retried silently for 78 seconds before returning an internal error, and an occluded face gets scored with no quality warning at all, so the client cannot tell a good reading from a bad one. The good half is that the model is exactly reproducible. Re-submitting the same image returns scores identical to 14 decimal places, which is what let us promise players that the same face always forges the same card. We could build a collectible identity on top of the API without storing a single photo or biometric ourselves.
+The good one was the afternoon we re-submitted the same photo just to see whether our card IDs would be stable. We expected small drift and were ready to round the scores to make the game work. Every one of the 15 metrics came back identical to 14 decimal places. That single test decided the design: the card became a promise instead of a roll, because your face and only your face produces it.
+
+The frustrating one came earlier the same week. A test shot taken slightly too far from the camera sat there for about 78 seconds before failing with an internal error, and a shot with hair across the forehead came back scored, confidently, with no warning that half the face was covered. We had assumed the API would tell us when an input was unusable. Finding out that it will not is what pushed the quality check onto the device.
 
 **Are there industries or use cases you think Perfect Corp.'s API could serve that nobody is talking about yet?**
 
-Two, both of which come from treating skin analysis as an input device rather than as a diagnosis.
+Two, and neither one is a beauty product.
 
-First, entertainment and live events. The 15 raw metrics are a rich, player-controllable signal: in our own measurements, one face pulling five expressions moved the summed deviation from 47 to 239. That is enough range to drive a game, a photo booth, or an on-stage interactive, and it puts the API in front of people who would never open a skincare scanner.
+**Entertainment and live events.** Skin analysis works as an input device. The 15 raw metrics are a signal the user can steer with their face: in our own measurements, one person pulling five expressions moved the summed deviation across all metrics from 47 to 239. That range is enough to drive a card game, an arcade cabinet, a photo booth, or a brand activation at an event, and it reaches people who would never open a skincare scanner. We built the card game to prove the range is real.
 
-Second, stateless identity for campaigns. Because the scores are deterministic to 14 decimal places, a hash of the raw vector works as a per-face token for things like one-entry-per-person giveaways or returning-visitor detection, without the operator ever storing a photo or a face embedding. The privacy story is unusually clean for that class of problem.
+**Caregiving, with the family member as the operator.** Every skin analysis product assumes the person holding the phone is the person being analyzed. A weekly skin log for an elderly relative flips that: the operator is a daughter or a home aide, and the subject may not be able to hold still or follow framing instructions. Nobody is building for that operator, and the market is large and growing. It is also the harder engineering problem, because it needs tolerance for imperfect framing and a signal for how much of the face was actually usable, which is the one thing we would ask of the API before building it.
 
 **Where did you hit a wall technically? How did you work around it?**
 

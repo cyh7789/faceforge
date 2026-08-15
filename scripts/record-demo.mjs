@@ -9,11 +9,6 @@ const OUT_DIR = process.env.OUT_DIR ?? "video-assets/raw";
 const P1 = path.resolve("video-assets/p1-crop.jpg");
 const P2 = path.resolve("video-assets/p2-crop.jpg");
 
-// Phaser 場景座標（games/battle/core/Constants.ts）
-const GAME = { WIDTH: 430, HEIGHT: 650 };
-const BUTTON_X = [74, 215, 356];
-const BUTTON_Y = [506, 576];
-
 const beat = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const marks = [];
@@ -24,18 +19,14 @@ function mark(label) {
   console.log(`MARK ${label} ${at.toFixed(2)}`);
 }
 
-async function clickCanvasPoint(page, cx, cy) {
-  const canvas = page.locator("canvas").first();
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error("battle canvas not found");
-  const scale = box.width / GAME.WIDTH;
-  await page.mouse.click(box.x + cx * scale, box.y + cy * scale);
-}
-
-async function pickStat(page, index) {
-  const cx = BUTTON_X[index % 3];
-  const cy = BUTTON_Y[Math.floor(index / 3) % 2];
-  await clickCanvasPoint(page, cx, cy);
+// 用鍵盤打一回合：數字選的是「還沒用過的」stat，比 canvas 座標可靠
+async function playRound(page) {
+  await page.keyboard.press("1");
+  await beat(900);
+  await page.keyboard.press("Enter");
+  await beat(500);
+  await page.keyboard.press("1");
+  await beat(4200);
 }
 
 async function drawCard(page, imagePath, label, markId, useCamera = false) {
@@ -145,12 +136,10 @@ async function main() {
   // BO3：每回合兩位玩家各選一個 stat
   mark("rounds");
   for (let round = 0; round < 3; round += 1) {
-    await pickStat(page, round);
-    await beat(1400);
-    await pickStat(page, round + 3);
-    await beat(4200);
+    await playRound(page);
+    if (await page.locator("text=Rematch").isVisible().catch(() => false)) break;
   }
-  await beat(6000);
+  await beat(4500);
 
   // 6. 收尾：回圖鑑
   mark("outro");

@@ -25,10 +25,10 @@
 | 01 | 0:00–0:04 | 街機開場：兩張鬼臉左右滑入，VS 撞擊 + 震動 | Two ugly faces. One winner. |
 | 02 | 0:04–0:12 | 首頁 FACEFORGE 標題 + 空的 15 宮格圖鑑 | Skin analysis apps grade your face and tell you what to fix. FaceForge takes the same scores and forges a fighter out of them. |
 | 03 | 0:12–0:26 | 左右分割同步：P1 相機即時預覽（綠框 Ready → 按快門），P2 相簿上傳（Face detected） | Two players, one phone, side by side. One shoots on camera, one picks from the album. A local face detector clears each face before anything leaves the device, then the YouCam Skin Analysis API scores fifteen skin metrics. |
-| 04 | 0:26–0:39 | 左右分割同步：兩張卡同時翻開（RARE vs LEGENDARY），中央 VS 分隔 | Your worst metric picks your class. Pores at fifty forges the Crater Warden. Droopy eyelids crown the Drooping Regent. Six battle stats come straight out of the raw scores, and the mirror has opinions about both of you. |
+| 04 | 0:26–0:39 | 左右分割同步：兩張卡同時翻開（RARE vs LEGENDARY），中央 VS 分隔 | Your worst metric picks your class. Weak pores forge the Crater Warden. Droopy eyelids crown the Drooping Regent. Six battle stats come straight out of the raw scores, and the mirror has opinions about both of you. |
 | 06 | 0:39–0:55 | 圖鑑兩格點亮 → 點卡 → 翻面看星座卡背 | Fifteen classes to unlock, one for every metric the API scores. The API is deterministic to fourteen decimal places, so the same face always forges the same card. Flip it, and the back draws your own wrinkle constellation. |
 | 07 | 0:55–1:01 | Battle → 2 Players → 選卡 → Lock P1 → 交接 → Enter Arena | Now put that face in the ring. Pick your fighter, lock it in, pass the phone. Best of three. |
-| 08 | 1:01–1:13 | BO3 三回合快切：選 stat → REVEAL → hit-stop → 結果與 roast（裁成 canvas 區放大） | Round one. Pick a stat, hope yours is higher. Round two. Round three. Loser gets roasted by the mirror. Every number on screen came out of a real API response. |
+| 08 | 0:59–1:11 | BO3 用鍵盤快打：選 stat → REVEAL → hit-stop → MATCH WINNER 與敗方 roast（裁成 canvas 區放大） | Pick a stat and hope yours is higher. Best of three, and it is over fast. The loser gets roasted by the mirror. Every number on screen came out of a real API response. |
 | 09 | 1:13–1:33 | 相機對著臉：綠框 Ready、快門開放 → 改從相簿選一張無臉照，本地 gate 直接擋下，Consult Mirror 變灰 | Everything here is built on measured API behavior. A bad photo costs seventy-eight seconds of silent retries, so every shot is checked on the device first. No face, and it never leaves the phone or spends a single unit. The flattering UI scores hide the interesting signal, so the whole engine runs on raw scores. |
 | 10 | 1:33–1:39 | 回圖鑑收尾 | Skin analysis tells you your face is flawed. FaceForge says your face is legendary. |
 
@@ -41,7 +41,7 @@
 5. `python3 scripts/build_video.py` — 依 marks 切段、對齊旁白、套側欄、串接
 6. `node scripts/shoot-screenshots.mjs` — Devpost 用五張截圖
 
-成品：`video-assets/faceforge-demo.mp4`（93.9 秒，1920x1080，真 API 錄製）
+成品：`video-assets/faceforge-demo.mp4`（93.5 秒，1920x1080，真 API 錄製）加燒錄字幕，另出 `faceforge-demo.srt` 給 YouTube
 
 ## 錄製規格
 

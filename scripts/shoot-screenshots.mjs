@@ -19,14 +19,14 @@ async function shot(page, name) {
   console.log("shot", name);
 }
 
-async function pickStat(page, index) {
-  const canvas = page.locator("canvas").first();
-  const box = await canvas.boundingBox();
-  const scale = box.width / GAME.WIDTH;
-  await page.mouse.click(
-    box.x + BUTTON_X[index % 3] * scale,
-    box.y + BUTTON_Y[Math.floor(index / 3) % 2] * scale,
-  );
+// 用鍵盤打完一回合：數字選的是「還沒用過的」stat，比 canvas 座標可靠
+async function playRound(page) {
+  await page.keyboard.press("1");
+  await beat(900);
+  await page.keyboard.press("Enter");
+  await beat(500);
+  await page.keyboard.press("1");
+  await beat(4200);
 }
 
 async function draw(page, image) {
@@ -99,25 +99,44 @@ async function main() {
   await beat(1000);
   await page.click("text=2 Players");
   await beat(800);
-  const names = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("faceforge.collection.v1") ?? "[]").map((c) => c.class.nameEn),
-  );
-  await page.locator("button", { hasText: names[0] }).last().click();
+  // 用名次而不是職業名選卡：兩張卡可能是同一個職業，用文字會選到同一顆已鎖定的按鈕
+  const roster = page.locator("section[aria-labelledby='roster-title'] button");
+  await roster.nth(0).click();
   await beat(600);
   await page.click("text=Lock P1 Card");
   await beat(700);
   await page.click("text=I'm Player 2");
   await beat(600);
-  await page.locator("button", { hasText: names[1] }).last().click();
+  await roster.nth(1).click();
   await beat(600);
   await page.click("text=Enter Arena");
   await page.waitForSelector("canvas", { timeout: 30_000 });
   await beat(2500);
-  await pickStat(page, 0);
+  await page.keyboard.press("1");
   await beat(900);
-  await pickStat(page, 3);
-  await beat(1400);
+  await page.keyboard.press("Enter");
+  await beat(500);
+  await page.keyboard.press("1");
+  await beat(1200);
   await shot(page, "05-battle");
+  await beat(3200);
+
+  // 6. 對戰結果與 roast：把 BO3 剩下的回合打完
+  for (let round = 0; round < 3; round += 1) {
+    await playRound(page);
+    if (await page.locator("text=Rematch").isVisible().catch(() => false)) break;
+  }
+  await beat(1500);
+  await shot(page, "06-battle-result");
+
+  // 7. 額度防火牆：相簿裡的無臉照被本地擋下
+  await page.goto(`${BASE_URL}/draw`);
+  await page.waitForSelector("#face-upload", { state: "attached" });
+  await beat(1200);
+  await page.setInputFiles("#face-upload", path.resolve("video-assets/upload-card.png"));
+  await page.waitForSelector("text=Choose another photo with a face", { timeout: 30_000 });
+  await beat(1200);
+  await shot(page, "07-credit-firewall");
 
   await context.close();
   await browser.close();

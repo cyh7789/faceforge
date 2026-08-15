@@ -1,0 +1,163 @@
+1
+00:00:00,000 --> 00:00:01,537
+Two ugly faces.
+
+2
+00:00:01,537 --> 00:00:02,664
+One winner.
+
+3
+00:00:02,664 --> 00:00:05,870
+Skin analysis apps grade your face and tell you what
+
+4
+00:00:05,870 --> 00:00:06,302
+to fix.
+
+5
+00:00:06,302 --> 00:00:09,508
+FaceForge takes the same scores and forges a fighter
+
+6
+00:00:09,508 --> 00:00:10,248
+out of them.
+
+7
+00:00:10,248 --> 00:00:12,627
+Two players, one phone, side by side.
+
+8
+00:00:12,627 --> 00:00:15,649
+One shoots on camera, one picks from the album.
+
+9
+00:00:15,649 --> 00:00:18,542
+A local face detector clears each face before
+
+10
+00:00:18,542 --> 00:00:21,628
+anything leaves the device, then the YouCam Skin
+
+11
+00:00:21,628 --> 00:00:24,264
+Analysis API scores fifteen skin metrics.
+
+12
+00:00:24,264 --> 00:00:26,394
+Your worst metric picks your class.
+
+13
+00:00:26,394 --> 00:00:28,524
+Weak pores forge the Crater Warden.
+
+14
+00:00:28,524 --> 00:00:31,020
+Droopy eyelids crown the Drooping Regent.
+
+15
+00:00:31,020 --> 00:00:33,758
+Six battle stats come straight out of the raw
+
+16
+00:00:33,758 --> 00:00:36,741
+scores, and the mirror has opinions about both of
+
+17
+00:00:36,741 --> 00:00:36,984
+you.
+
+18
+00:00:36,984 --> 00:00:40,509
+Fifteen classes to unlock, one for every metric the
+
+19
+00:00:40,509 --> 00:00:41,270
+API scores.
+
+20
+00:00:41,270 --> 00:00:44,864
+The API is deterministic to fourteen decimal places,
+
+21
+00:00:44,864 --> 00:00:47,975
+so the same face always forges the same card.
+
+22
+00:00:47,975 --> 00:00:51,016
+Flip it, and the back draws your own wrinkle
+
+23
+00:00:51,016 --> 00:00:51,984
+constellation.
+
+24
+00:00:51,984 --> 00:00:53,976
+Now put that face in the ring.
+
+25
+00:00:53,976 --> 00:00:57,030
+Pick your fighter, lock it in, pass the phone.
+
+26
+00:00:57,030 --> 00:00:57,960
+Best of three.
+
+27
+00:00:57,960 --> 00:01:00,477
+Pick a stat and hope yours is higher.
+
+28
+00:01:00,477 --> 00:01:02,858
+Best of three, and it is over fast.
+
+29
+00:01:02,858 --> 00:01:05,375
+The loser gets roasted by the mirror.
+
+30
+00:01:05,375 --> 00:01:08,436
+Every number on screen came out of a real API
+
+31
+00:01:08,436 --> 00:01:09,048
+response.
+
+32
+00:01:09,048 --> 00:01:12,134
+Everything here is built on measured API behavior.
+
+33
+00:01:12,134 --> 00:01:15,159
+A bad photo costs seventy-eight seconds of silent
+
+34
+00:01:15,159 --> 00:01:18,060
+retries, so every shot is checked on the device
+
+35
+00:01:18,060 --> 00:01:18,430
+first.
+
+36
+00:01:18,430 --> 00:01:21,517
+No face, and it never leaves the phone or spends a
+
+37
+00:01:21,517 --> 00:01:22,257
+single unit.
+
+38
+00:01:22,257 --> 00:01:25,035
+The flattering UI scores hide the interesting
+
+39
+00:01:25,035 --> 00:01:27,936
+signal, so the whole engine runs on raw scores.
+
+40
+00:01:27,936 --> 00:01:30,911
+Skin analysis tells you your face is flawed.
+
+41
+00:01:30,911 --> 00:01:33,480
+FaceForge says your face is legendary.

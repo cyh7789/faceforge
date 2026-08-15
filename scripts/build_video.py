@@ -40,6 +40,10 @@ SEGMENTS = [
 ]
 
 
+def vo_text(vo_id: str) -> str:
+    return (VO / f"{vo_id}.txt").read_text().strip()
+
+
 def duration(path: pathlib.Path) -> float:
     out = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -47,6 +51,43 @@ def duration(path: pathlib.Path) -> float:
         capture_output=True, text=True, check=True,
     )
     return float(out.stdout.strip())
+
+
+def split_caption_lines(text: str, limit: int = 52) -> list[str]:
+    """把旁白切成字幕行：先斷句，過長的句子再依寬度折行。"""
+    import re
+
+    chunks: list[str] = []
+    for sentence in re.split(r"(?<=[.!?:]) +", text.strip()):
+        words = sentence.split()
+        line = ""
+        for word in words:
+            candidate = f"{line} {word}".strip()
+            if len(candidate) > limit and line:
+                chunks.append(line)
+                line = word
+            else:
+                line = candidate
+        if line:
+            chunks.append(line)
+    return chunks
+
+
+def caption_layer(name: str, index: int, line: str) -> pathlib.Path:
+    """單行字幕圖層：畫面下緣的深色條 + 白字。"""
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    font = ImageFont.truetype(HELV, 40)
+    box = draw.textbbox((0, 0), line, font=font)
+    text_w, text_h = box[2] - box[0], box[3] - box[1]
+    pad_x, pad_y = 34, 20
+    band_w, band_h = text_w + pad_x * 2, text_h + pad_y * 2
+    x0, y0 = (W - band_w) / 2, H - band_h - 54
+    draw.rounded_rectangle([x0, y0, x0 + band_w, y0 + band_h], radius=16, fill=(16, 8, 20, 214))
+    draw.text((x0 + pad_x, y0 + pad_y - box[1]), line, font=font, fill=CREAM)
+    path = BUILD / f"cap_{name}_{index:02d}.png"
+    layer.save(path)
+    return path
 
 
 def sidebar(name: str, title: str, lines: list[str], split: bool = False) -> pathlib.Path:
@@ -124,6 +165,15 @@ def main() -> None:
         pad = max(0.0, want - take / speed)
 
         side = sidebar(vo_id, title, lines, split=is_split)
+        caption_lines = split_caption_lines(vo_text(vo_id))
+        total_chars = sum(len(line) for line in caption_lines) or 1
+        vo_len = duration(vo_path)
+        captions = []
+        cursor = 0.0
+        for i, line in enumerate(caption_lines):
+            span = vo_len * len(line) / total_chars
+            captions.append((caption_layer(vo_id, i, line), cursor, cursor + span))
+            cursor += span
         out = BUILD / f"seg_{vo_id}.mp4"
         crop_filter = f"crop=iw:ih*{crop}:0:0," if crop else ""
         common = f"setpts=PTS/{speed:.4f}"
@@ -143,6 +193,7 @@ def main() -> None:
                 "-i", str(side), "-i", str(vo_path),
             ]
             audio_map = "3:a"
+            next_input = 4
         else:
             chain = (
                 f"[0:v]{crop_filter}scale=-2:{PHONE_H},{common},"
@@ -155,11 +206,22 @@ def main() -> None:
                 "-i", str(side), "-i", str(vo_path),
             ]
             audio_map = "2:a"
+            next_input = 3
+
+        label = "v"
+        for i, (cap_path, cap_start, cap_end) in enumerate(captions):
+            inputs += ["-i", str(cap_path)]
+            nxt = f"c{i}"
+            chain += (
+                f";[{label}][{next_input + i}:v]"
+                f"overlay=0:0:enable='between(t,{cap_start:.2f},{cap_end:.2f})':format=auto[{nxt}]"
+            )
+            label = nxt
 
         subprocess.run(
             ["ffmpeg", "-y", "-v", "error", *inputs,
              "-filter_complex", chain,
-             "-map", "[v]", "-map", audio_map,
+             "-map", f"[{label}]", "-map", audio_map,
              "-shortest", "-r", str(FPS), "-c:v", "libx264", "-pix_fmt", "yuv420p",
              "-c:a", "aac", "-b:a", "192k", str(out)],
             check=True,
@@ -178,6 +240,32 @@ def main() -> None:
          str(intro_out)],
         check=True,
     )
+
+    # 給 YouTube 用的 SRT：段落順序與各段實際長度算出時間軸
+    srt_lines = []
+    clock = 0.0
+    index = 1
+
+    def stamp(value: float) -> str:
+        ms = int(round(value * 1000))
+        h, ms = divmod(ms, 3_600_000)
+        m, ms = divmod(ms, 60_000)
+        sec, ms = divmod(ms, 1000)
+        return f"{h:02d}:{m:02d}:{sec:02d},{ms:03d}"
+
+    for part in [intro_out] + parts:
+        vo_id = part.stem.split("_")[1]
+        part_len = duration(part)
+        lines = split_caption_lines(vo_text(vo_id))
+        total = sum(len(line) for line in lines) or 1
+        cursor = clock
+        for line in lines:
+            span = duration(VO / f"{vo_id}.mp3") * len(line) / total
+            srt_lines.append(f"{index}\n{stamp(cursor)} --> {stamp(cursor + span)}\n{line}\n")
+            cursor += span
+            index += 1
+        clock += part_len
+    pathlib.Path("video-assets/faceforge-demo.srt").write_text("\n".join(srt_lines))
 
     listing = BUILD / "concat.txt"
     listing.write_text("".join(f"file '{p.resolve()}'\n" for p in [intro_out] + parts))

@@ -12,10 +12,10 @@ write() { printf '%s' "$2" > "$OUT/$1.txt"; }
 write 01 "Two ugly faces. One winner."
 write 02 "Skin analysis apps grade your face and tell you what to fix. FaceForge takes the same scores and forges a fighter out of them."
 write 03 "Two players, one phone, side by side. One shoots on camera, one picks from the album. A local face detector clears each face before anything leaves the device, then the YouCam Skin Analysis API scores fifteen skin metrics."
-write 04 "Your worst metric picks your class. Pores at fifty forges the Crater Warden. Droopy eyelids crown the Drooping Regent. Six battle stats come straight out of the raw scores, and the mirror has opinions about both of you."
+write 04 "Your worst metric picks your class. Weak pores forge the Crater Warden. Droopy eyelids crown the Drooping Regent. Six battle stats come straight out of the raw scores, and the mirror has opinions about both of you."
 write 06 "Fifteen classes to unlock, one for every metric the API scores. The API is deterministic to fourteen decimal places, so the same face always forges the same card. Flip it, and the back draws your own wrinkle constellation."
 write 07 "Now put that face in the ring. Pick your fighter, lock it in, pass the phone. Best of three."
-write 08 "Round one. Pick a stat, hope yours is higher. Round two. Round three. Loser gets roasted by the mirror. Every number on screen came out of a real API response."
+write 08 "Pick a stat and hope yours is higher. Best of three, and it is over fast. The loser gets roasted by the mirror. Every number on screen came out of a real API response."
 write 09 "Everything here is built on measured API behavior. A bad photo costs seventy-eight seconds of silent retries, so every shot is checked on the device first. No face, and it never leaves the phone or spends a single unit. The flattering UI scores hide the interesting signal, so the whole engine runs on raw scores."
 write 10 "Skin analysis tells you your face is flawed. FaceForge says your face is legendary."
 
