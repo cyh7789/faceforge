@@ -130,15 +130,25 @@ youcam api, perfect corp, skin analysis, hackathon, devpost, ai, card game, medi
 
 ## Devpost form: text description (paste as one field)
 
-FaceForge is a mobile web card game where your face is the controller, built on the YouCam Skin Analysis API.
+FaceForge is a mobile web card game where your face is the controller. It runs on the YouCam Skin Analysis API, and it treats a low skin score as a reward instead of a defect.
 
-You take a selfie with the most extreme expression you can manage. Before anything is sent anywhere, a locally hosted MediaPipe face detector confirms a real face is in frame, so photos that would be wasted never reach the API. The YouCam Skin Analysis API then scores 15 skin metrics, and FaceForge reads that response as character generation: your weakest metric picks your RPG class, your strongest becomes your talent, six battle stats are derived from the raw scores, and the mirror roasts you by name for whichever metric let you down. The card back plots a constellation drawn from your own wrinkle readings. There are 15 classes, one per metric, and you can battle a friend on the same phone, an NPC, or an opponent across the table through a 4-digit room code, best of three, stat against stat.
+FEATURES
+- Draw a card from a selfie: pull the most extreme expression you can, and the analysis becomes a character.
+- 15 RPG classes, one for each metric the API scores. Your weakest metric picks the class, your strongest becomes your talent.
+- Six battle stats derived from the raw scores, plus a curse and a roast that names the metric that let you down.
+- A card back that plots a constellation from your own wrinkle readings.
+- A 15-slot collection album that tracks which classes you have unlocked.
+- Three ways to duel, best of three, stat against stat: an NPC, a friend on the same phone, or an opponent on another phone through a 4-digit room code.
+- Save any card as an image to share.
 
-The inversion is the product. Every skin analysis experience tells people what is wrong with their face, which works exactly once. FaceForge rewards deviation instead: the further your expression pushes the scores away from a neutral baseline, the rarer the card. In our own measurements, one face pulling five different expressions produced weirdness scores from 47 to 239, a 5.1x spread, so rarity is something the player steers with their face rather than a random roll. The API is deterministic to 14 decimal places, so the same face always forges the same card and the collection is honest.
+HOW IT WORKS
+Take a selfie or pick a photo. A MediaPipe BlazeFace detector, self-hosted as WASM with zero external calls, confirms a real face is in frame before anything is sent, so a photo that would be wasted never reaches the API and never spends a unit. A server-side proxy holds the API key and calls the YouCam Skin Analysis API in SD mode, 16 actions, returning 15 raw skin metrics. The game engine reads that response as character generation: weakest metric to class, strongest to talent, summed absolute deviation from a neutral baseline to rarity, and the six battle stats from the same raw values. The engine runs on raw scores rather than the flattering UI scores, because a game about deviation needs the unflattered signal.
 
-The retail value is repeat engagement on an API a brand is already paying for. A conventional scan is one call per visitor and ends at the result screen. Collecting 15 classes and challenging a friend both require more analyses, and every one of them is another YouCam API call inside the brand's campaign. It also reaches an audience that avoids skincare scanners entirely, because nothing about the experience asks the player to care about their pores.
+CONSUMER AND RETAIL VALUE
+A conventional skin scan is one API call per visitor, and engagement ends at the result screen: the product just told the person what is wrong with their face. FaceForge inverts that reward, so the visitor wants to run it again. Collecting 15 classes and challenging a friend both require more analyses, and every one of them is another call on the API a brand is already paying for. It also reaches people who would never open a skincare scanner, because nothing in the experience asks the player to care about their pores. For a brand activation, an event booth, or a retail campaign, that is the difference between one scan per visitor and a reason to come back.
 
-Every game constant comes from committed real API responses, replayed offline as fixtures, which is how the game was designed and built on 90 of our 1,000 units. The engine ships with 110 passing tests.
+EVIDENCE
+Rarity is steered by the player, not rolled: in our measurements, one face pulling five different expressions moved the summed deviation across all 15 metrics from 47 to 239, a 5.1x spread. Card identity is stable because the API is deterministic to 14 decimal places, so the same face always forges the same card. Every game constant was measured from committed real API responses before the game was written, and those fixtures replay offline, which is how the whole build cost 90 of our 1,000 units. The engine ships with 110 passing tests.
 
 ## Devpost form: Additional info answers
 
