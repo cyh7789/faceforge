@@ -12,7 +12,7 @@ Pull your ugliest face, and the YouCam Skin Analysis API turns your worst skin m
 
 ## Inspiration
 
-Every skin analysis product opens with the same move: it scores your face and hands you a list of what is wrong with it. That framing works once. People run the scan, read that their pores rank 48 out of 100, and never open it again. Brands buying skin analysis for retail campaigns hit this wall hardest, because engagement dies at the exact moment the result appears. We build ingredient-analysis tools for skincare consumers, so we have watched this reaction up close: the technology is accurate, and the delivery makes people close the app.
+Every skin analysis product opens with the same move: it scores your face and hands you a list of what is wrong with it. That framing works once. People run the scan, read that their pores rank in the bottom half, and never open it again. Brands buying skin analysis for retail campaigns hit this wall hardest, because engagement dies at the exact moment the result appears. We build ingredient-analysis tools for skincare consumers, so we have watched this reaction up close: the technology is accurate, and the delivery makes people close the app.
 
 So we inverted the reward. If a low score forged a rarer card, would people run the analysis again? They do. They run it repeatedly, pulling worse and worse faces on purpose.
 
@@ -28,6 +28,8 @@ Take a selfie with the most extreme expression you can manage. A local face dete
 - **The mirror roasts you**, using your worst metric by name.
 
 Collect all 15 classes, then fight: NPCs, a friend on the same phone, or an opponent across the table through a 4-digit room code. Best of three, stat against stat, with the loser roasted on the results screen.
+
+For a brand running skin analysis as a campaign, this is the difference between one scan per visitor and a reason to come back: collecting 15 classes and challenging a friend both require more analyses, and every one of them runs through the same API call the brand is already paying for.
 
 The measured payoff: the same face pulling five different expressions produced weirdness scores from 47 to 239, a 5.1x spread, so rarity is something the player controls with their face rather than a random roll.
 
@@ -68,7 +70,9 @@ The design decision that shaped everything: measure the API first, design the ga
 
 **We assumed a face filling the frame was the ideal input.** It is not. Push in too close and the API returns `error_src_face_out_of_bound`, which our proxy had been folding into a generic upstream failure, so the player only saw "the mirror went cloudy" with no way to act on it. It now maps to its own 422 and a message that tells you to back off, which is the difference between a dead end and a retry.
 
-**We assumed our test faces were representative.** They are AI-generated, and the API's calibration is documented for real photography, so our rarity thresholds carry that caveat. We state it rather than hide it, and the recalibration path is a per-user baseline: compare a player's neutral shot against their own grimace instead of a global threshold.
+## Known limitation
+
+Our rarity thresholds are calibrated on AI-generated faces, and the API's own calibration is documented for real photography, so the numbers in the table above carry that caveat. The fix is a per-user baseline: compare a player's neutral shot against their own grimace instead of against a global threshold. We state this rather than hide it.
 
 ## What we learned
 
