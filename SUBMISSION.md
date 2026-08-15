@@ -93,6 +93,18 @@ next.js, typescript, tailwind-css, youcam-skin-analysis-api, mediapipe, phaser, 
 - GitHub: https://github.com/cyh7789/faceforge
 - Demo video: (YouTube link, pending upload)
 
+## Devpost form: text description (paste as one field)
+
+FaceForge is a mobile web card game where your face is the controller, built on the YouCam Skin Analysis API.
+
+You take a selfie with the most extreme expression you can manage. Before anything is sent anywhere, a locally hosted MediaPipe face detector confirms a real face is in frame, so photos that would be wasted never reach the API. The YouCam Skin Analysis API then scores 15 skin metrics, and FaceForge reads that response as character generation: your weakest metric picks your RPG class, your strongest becomes your talent, six battle stats are derived from the raw scores, and the mirror roasts you by name for whichever metric let you down. The card back plots a constellation drawn from your own wrinkle readings. There are 15 classes, one per metric, and you can battle a friend on the same phone, an NPC, or an opponent across the table through a 4-digit room code, best of three, stat against stat.
+
+The inversion is the product. Every skin analysis experience tells people what is wrong with their face, which works exactly once. FaceForge rewards deviation instead: the further your expression pushes the scores away from a neutral baseline, the rarer the card. In our own measurements, one face pulling five different expressions produced weirdness scores from 47 to 239, a 5.1x spread, so rarity is something the player steers with their face rather than a random roll. The API is deterministic to 14 decimal places, so the same face always forges the same card and the collection is honest.
+
+The retail value is repeat engagement on an API a brand is already paying for. A conventional scan is one call per visitor and ends at the result screen. Collecting 15 classes and challenging a friend both require more analyses, and every one of them is another YouCam API call inside the brand's campaign. It also reaches an audience that avoids skincare scanners entirely, because nothing about the experience asks the player to care about their pores.
+
+Every game constant comes from committed real API responses, replayed offline as fixtures, which is how the game was designed and built on 90 of our 1,000 units. The engine ships with 110 passing tests.
+
 ## Devpost form: Additional info answers
 
 **Submitter type**: Individual
