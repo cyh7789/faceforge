@@ -56,3 +56,29 @@ next-env.d.ts
 /VIDEO-RECORDING-PROMPT.md
 /.agents/
 /video-assets/fakecam/
+
+# 開發過程檔案，不進參賽 repo
+/prompt-batch*.md
+/AGENTS.md
+/CLAUDE.md
+/video-assets/screenshots/
+
+# 交件物與製作素材：交件物在 ../faceforge-submission/，產線腳本與素材不進參賽 repo
+/submission/
+/video-assets/
+/SUBMISSION.md
+/VIDEO-SCRIPT.md
+/CORRECTION-PLAN.md
+
+# demo 產線腳本：留在原位方便重跑，但不進參賽 repo
+/scripts/build_video.py
+/scripts/collect_submission.py
+/scripts/make_architecture.py
+/scripts/make_gallery.py
+/scripts/make_intro.py
+/scripts/make_thumbnail.py
+/scripts/make-fakecam.sh
+/scripts/make-intro.sh
+/scripts/make-vo.sh
+/scripts/record-demo.mjs
+/scripts/shoot-screenshots.mjs
