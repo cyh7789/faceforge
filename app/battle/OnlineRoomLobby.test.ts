@@ -49,14 +49,14 @@ describe("OnlineRoomControls", () => {
         card: APPRENTICE_MOCHI,
         joinCode: "9999",
         pending: false,
-        error: "找不到房間 · Room not found",
+        error: "Room not found",
         onJoinCodeChange: vi.fn(),
         onCreate: vi.fn(),
         onJoin: vi.fn(),
       }),
     );
 
-    expect(html).toContain("找不到房間 · Room not found");
+    expect(html).toContain("Room not found");
     expect(html).toContain("Create New Room");
   });
 });

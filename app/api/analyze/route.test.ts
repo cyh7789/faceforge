@@ -56,7 +56,7 @@ describe("POST /api/analyze", () => {
     const body = (await response.json()) as { card: Card };
 
     expect(response.status).toBe(200);
-    expect(body.card.class.name).toBe("乾燥大法師");
+    expect(body.card.class.name).toBe("Caster of the Dry Season");
     expect(body.card.id).toMatch(/^ff-[0-9a-f]{8}$/);
     expect(body.card.maskUrl).toBeNull();
     expect(Object.keys(body.card.rawScores)).toHaveLength(15);
@@ -71,7 +71,7 @@ describe("POST /api/analyze", () => {
     const body = (await response.json()) as { card: Card };
 
     expect(response.status).toBe(200);
-    expect(body.card.class.name).toBe("乾燥大法師");
+    expect(body.card.class.name).toBe("Caster of the Dry Season");
     expect(fetchMock).toHaveBeenCalledTimes(4);
     const createTask = fetchMock.mock.calls[2]?.[1] as RequestInit;
     const taskBody = JSON.parse(String(createTask.body)) as { dst_actions: string[] };

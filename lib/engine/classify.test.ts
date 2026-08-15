@@ -16,12 +16,12 @@ describe("classifyScores", () => {
 
     const result = classifyScores(scores);
 
-    expect(result.classInfo.name).toBe("粗獷遊俠");
+    expect(result.classInfo.name).toBe("Rider of Rough Terrain");
     expect(result.classInfo.flavor).toBe(
-      "皮糙肉厚走天下，磨砂質感是野外生存的證明。",
+      "Thick skin travels far. Sandpaper texture is proof of survival.",
     );
-    expect(result.talent).toEqual({ metric: "redness", name: "冷靜之心" });
-    expect(result.curse).toEqual({ metric: "texture", name: "膚理", score: 12 });
+    expect(result.talent).toEqual({ metric: "redness", name: "Cold Blood" });
+    expect(result.curse).toEqual({ metric: "texture", name: "Texture", score: 12 });
     expect(classifyScores(scores)).toEqual(result);
   });
 
@@ -30,7 +30,7 @@ describe("classifyScores", () => {
 
     expect(result.classInfo).toMatchObject({
       key: "dewlight_paladin",
-      name: "水光聖騎士",
+      name: "Bearer of the Halo",
     });
   });
 

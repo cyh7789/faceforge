@@ -116,6 +116,25 @@ interface BattleModePickerProps {
   onChange: (mode: BattleMode) => void;
 }
 
+interface AddFighterLinkProps {
+  first?: boolean;
+  href: string;
+  variant?: "primary" | "secondary";
+}
+
+export function AddFighterLink({
+  first = false,
+  href,
+  variant = "secondary",
+}: AddFighterLinkProps) {
+  return (
+    <Link href={href} className={`sticker-button sticker-button-${variant}`}>
+      <span>{first ? "Add First Fighter" : "Add Fighter"}</span>
+      <small>Camera or Album</small>
+    </Link>
+  );
+}
+
 export function BattleModePicker({ mode, onChange }: BattleModePickerProps) {
   return (
     <section className={styles.modePicker} aria-label="Battle mode">
@@ -321,15 +340,13 @@ export default function BattleGame() {
         <section className={styles.emptyPanel}>
           <div className={styles.emptyVs} aria-hidden="true">VS</div>
           <p className={styles.eyebrow}>YOUR ROSTER IS EMPTY</p>
-          <h1>Draw a hero first</h1>
-          <p>Draw a face-fighter card first so the Mirror has a fighter to send in.</p>
-          <Link
+          <h1>Add your first fighter</h1>
+          <p>Take a photo or choose one from your album, then let the Mirror forge your fighter.</p>
+          <AddFighterLink
             href={`/draw?returnTo=battle&mode=${mode}&player=A`}
-            className="sticker-button sticker-button-primary"
-          >
-            <span>Draw First Card</span>
-            <small>Draw a Card First</small>
-          </Link>
+            first
+            variant="primary"
+          />
         </section>
       </main>
     );
@@ -401,14 +418,14 @@ export default function BattleGame() {
                   {drawRoasts.map(({ card, roast }) => (
                     <div key={card.id} className={styles.roastBubble} lang="zh-Hant">
                       <strong>The Mirror&apos;s roast for {cardName(card)}:</strong>
-                      <p>「{roast}」</p>
+                      <p>&ldquo;{roast}&rdquo;</p>
                     </div>
                   ))}
                 </div>
               ) : loser ? (
                 <div className={styles.roastBubble} lang="zh-Hant">
                   <strong>The Mirror&apos;s roast for {cardName(loser)}:</strong>
-                  <p>「{loserRoast}」</p>
+                  <p>&ldquo;{loserRoast}&rdquo;</p>
                 </div>
               ) : null}
               <div className={styles.resultActions}>
@@ -579,7 +596,7 @@ export default function BattleGame() {
                     />
                   </span>
                   <strong>{card.class.nameEn}</strong>
-                  <small lang="zh-Hant">{card.class.name}</small>
+                  <small>{card.class.name}</small>
                 </>
               ) : (
                 <>
@@ -627,7 +644,7 @@ export default function BattleGame() {
                 </span>
                 <span className={styles.choiceCopy}>
                   <strong>{card.class.nameEn}</strong>
-                  <small lang="zh-Hant">{card.class.name}</small>
+                  <small>{card.class.name}</small>
                   <span className={styles.miniStats}>
                     {STAT_LABELS.map(({ key, label }) => (
                       <i key={key}>{label} {card.stats[key]}</i>
@@ -671,7 +688,7 @@ export default function BattleGame() {
                   </span>
                   <span>
                     <strong>{npc.nameEn}</strong>
-                    <small lang="zh-Hant">{npc.name}</small>
+                    <small>{npc.name}</small>
                     <i>
                       {npc.npcStrategy === "apprentice"
                         ? "Random picks · Apprentice"
@@ -692,24 +709,16 @@ export default function BattleGame() {
             onConnected={setOnlineSession}
           />
           <div className={`${styles.selectionActions} ${styles.onlineDrawAction}`}>
-            <Link
+            <AddFighterLink
               href="/draw?returnTo=battle&mode=online&player=A"
-              className="sticker-button sticker-button-secondary"
-            >
-              <span>Draw New</span>
-              <small>Draw One Now</small>
-            </Link>
+            />
           </div>
         </>
       ) : (
         <div className={styles.selectionActions}>
-          <Link
+          <AddFighterLink
             href={`/draw?returnTo=battle&mode=${mode}&player=${mode === "quick" ? "A" : activePlayer}`}
-            className="sticker-button sticker-button-secondary"
-          >
-            <span>Draw New</span>
-            <small>Draw One Now</small>
-          </Link>
+          />
           <button
             type="button"
             className="sticker-button sticker-button-primary"

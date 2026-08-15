@@ -97,7 +97,7 @@ describe("wrinkle constellation layout", () => {
     }
   });
 
-  it("provides one deterministic bilingual fortune for every class", () => {
+  it("provides one deterministic English fortune for every class", () => {
     const classKeys = new Set([
       ...Object.values(CLASS_BY_WEAKEST).map(({ key }) => key),
       PALADIN.key,
@@ -108,7 +108,7 @@ describe("wrinkle constellation layout", () => {
     expect(fortunes).toHaveLength(15);
     expect(new Set(fortunes)).toHaveLength(15);
     for (const fortune of fortunes) {
-      expect(fortune).toMatch(/[\u3400-\u9fff].* · [A-Za-z]/);
+      expect(fortune).toMatch(/^[A-Za-z][A-Za-z ,.'-]+\.$/);
     }
   });
 });

@@ -110,7 +110,7 @@ export function CharacterCard({
             </span>
 
             <span className={styles.roast} lang="zh-Hant">
-              「{card.roast}」
+              &ldquo;{card.roast}&rdquo;
             </span>
           </span>
         </span>

@@ -17,7 +17,7 @@ describe("buildCard", () => {
 
     expect(first).toEqual(second);
     expect(first.id).toBe("ff-163628c5");
-    expect(first.class.name).toBe("乾燥大法師");
+    expect(first.class.name).toBe("Caster of the Dry Season");
     expect(first.rarity).toBe("common");
     expect(first.weirdness).toBeCloseTo(0, 10);
     expect(first.maskUrl).toBeNull();

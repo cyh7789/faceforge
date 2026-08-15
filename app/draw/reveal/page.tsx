@@ -236,7 +236,7 @@ export default function RevealPage() {
       </section>
 
       <p className="mt-4 text-center text-sm font-bold text-ff-plum" aria-live="polite">
-        {flipped ? "Card revealed — tap it anytime to flip" : "Tap the face-down card"}
+        {flipped ? "Card revealed. Tap it anytime to flip." : "Tap the face-down card"}
       </p>
 
       {flipped && (

@@ -8,7 +8,7 @@ import {
   APPRENTICE_MOCHI,
   GRIMACE_MASTER,
 } from "@/lib/engine/presets";
-import BattleGame, { BattleModePicker } from "./BattleGame";
+import BattleGame, { AddFighterLink, BattleModePicker } from "./BattleGame";
 
 vi.mock("next/dynamic", () => ({
   default: () => () => null,
@@ -87,5 +87,25 @@ describe("BattleGame mode picker", () => {
     expect(html).toContain("Online Room");
     expect(html).toContain("Connect two phones");
     expect(html).toContain('aria-pressed="true"');
+  });
+});
+
+describe("AddFighterLink", () => {
+  it("presents camera and album as equal ways to add a battle fighter", () => {
+    const html = renderToStaticMarkup(
+      createElement(AddFighterLink, {
+        first: true,
+        href: "/draw?returnTo=battle&mode=twoPlayers&player=A",
+        variant: "primary",
+      }),
+    );
+
+    expect(html).toContain("Add First Fighter");
+    expect(html).toContain("Camera or Album");
+    expect(html).toContain("sticker-button-primary");
+    expect(html).toContain(
+      'href="/draw?returnTo=battle&amp;mode=twoPlayers&amp;player=A"',
+    );
+    expect(html).not.toContain("Draw First Card");
   });
 });

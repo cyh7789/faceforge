@@ -9,11 +9,11 @@ import { buildCard } from "./card";
 import { parseYouCamResult } from "./parse";
 
 const CASES = [
-  ["neutral", neutral, "乾燥大法師", "common"],
-  ["frown", frown, "粗獷遊俠", "rare"],
-  ["squint", squint, "垂簾聽政者", "legendary"],
-  ["puff", puff, "隕坑守望者", "common"],
-  ["roar", roar, "隕坑守望者", "rare"],
+  ["neutral", neutral, "Caster of the Dry Season", "common"],
+  ["frown", frown, "Rider of Rough Terrain", "rare"],
+  ["squint", squint, "Ruler of the Half-Closed Eye", "legendary"],
+  ["puff", puff, "Guardian of the Lunar Surface", "common"],
+  ["roar", roar, "Guardian of the Lunar Surface", "rare"],
 ] as const;
 
 describe("fixture card pipeline", () => {

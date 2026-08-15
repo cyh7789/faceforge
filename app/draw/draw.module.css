@@ -279,6 +279,32 @@
   padding: 8px 20px calc(20px + env(safe-area-inset-bottom));
 }
 
+.sourceActions {
+  display: grid;
+  width: min(100%, 330px);
+  grid-template-columns: 94px 1fr;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.cameraAction {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.cameraAction > strong {
+  color: #fff6df;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-shadow: 0 2px 4px #2e1e39;
+}
+
 .captureError {
   margin-bottom: 10px;
   padding: 7px 10px;
@@ -324,25 +350,46 @@
 
 .uploadButton {
   display: flex;
-  min-height: 44px;
+  min-height: 96px;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 12px;
-  padding-inline: 18px;
-  border: 0;
-  background: transparent;
-  color: #fff6df;
+  padding: 9px 16px;
+  border: 3px solid #fff6df;
+  border-radius: 18px;
+  background: #f4cf83;
+  box-shadow: 0 5px 0 #735080;
+  color: #4b3458;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 900;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out;
+}
+
+.uploadButton:active {
+  box-shadow: 0 2px 0 #735080;
+  transform: translateY(3px) scale(0.98);
+}
+
+.uploadIcon {
+  font-size: 23px;
+  line-height: 1;
+}
+
+.uploadButton strong {
+  margin-top: 3px;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.uploadButton small {
+  margin-top: 3px;
+  font-size: 9px;
+  font-weight: 850;
 }
 
 .albumHint {
   max-width: 290px;
-  margin-top: 2px;
+  margin-top: 8px;
   color: #f2bfd1;
   font-size: 10px;
   font-weight: 800;
@@ -373,12 +420,35 @@
     padding: 0;
   }
 
+  .sourceActions {
+    width: 250px;
+    grid-template-columns: 66px 1fr;
+    gap: 8px;
+  }
+
+  .shutter {
+    width: 58px;
+    height: 58px;
+  }
+
+  .shutter span {
+    width: 44px;
+    height: 44px;
+  }
+
   .uploadButton {
-    margin-top: 7px;
+    min-height: 78px;
   }
 
   .albumHint {
     max-width: 170px;
     font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shutter,
+  .uploadButton {
+    transition: none;
   }
 }

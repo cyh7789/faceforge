@@ -1,12 +1,12 @@
 import type { RawScores, Stats } from "./types";
 
 export const STAT_LABELS: Readonly<Record<keyof Stats, string>> = {
-  hp: "水潤",
-  mp: "靈氣",
-  def: "屏障",
-  agi: "細滑",
-  luk: "淨運",
-  grit: "風霜",
+  hp: "Dew",
+  mp: "Aura",
+  def: "Barrier",
+  agi: "Glide",
+  luk: "Purity",
+  grit: "Weathering",
 };
 
 function clamp(value: number): number {

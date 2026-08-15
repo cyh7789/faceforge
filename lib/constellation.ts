@@ -31,21 +31,21 @@ const ZONES: readonly ConstellationZone[] = [
 ];
 
 const FORTUNE_BY_CLASS = {
-  oil_glow_berserker: "油光照路，好運不迷路 · Shine on, luck follows.",
-  dry_mage: "荒漠藏泉，轉角有甜 · A sweet oasis awaits.",
-  acne_summoner: "星點成陣，貴人報到 · Your stars summon allies.",
-  matte_recluse: "低調藏光，驚喜登場 · Quiet glow, loud luck.",
-  wrinkle_sage: "紋路指北，笑運正盛 · Smile lines lead to luck.",
-  night_assassin: "熬夜成星，今晨有喜 · Night stars bring dawn luck.",
-  flame_sorcerer: "紅霞開運，心願升溫 · Warm wishes rise.",
-  crater_warden: "毛孔納福，好事入住 · Good luck finds room.",
-  rugged_ranger: "路粗運順，勇氣帶財 · Rough roads, smooth luck.",
-  sagging_swordmaster: "重力向下，福氣向上 · Gravity dips, fortune lifts.",
-  bag_merchant: "眼袋藏寶，今晚開箱 · Your eye bags hide treasure.",
-  starspot_diviner: "星斑成圖，答案靠近 · Your star map knows.",
-  tear_trough_bard: "淚溝成河，桃花靠岸 · Romance docks nearby.",
-  drooping_regent: "眼簾半垂，福氣全開 · Sleepy eyes, open fortune.",
-  dewlight_paladin: "水光滿格，願望連勝 · Full glow, winning wishes.",
+  oil_glow_berserker: "Shine on, luck follows.",
+  dry_mage: "A sweet oasis awaits.",
+  acne_summoner: "Your stars summon allies.",
+  matte_recluse: "Quiet glow, loud luck.",
+  wrinkle_sage: "Smile lines lead to luck.",
+  night_assassin: "Night stars bring dawn luck.",
+  flame_sorcerer: "Warm wishes rise.",
+  crater_warden: "Good luck finds room.",
+  rugged_ranger: "Rough roads, smooth luck.",
+  sagging_swordmaster: "Gravity dips, fortune lifts.",
+  bag_merchant: "Your eye bags hide treasure.",
+  starspot_diviner: "Your star map knows.",
+  tear_trough_bard: "Romance docks nearby.",
+  drooping_regent: "Sleepy eyes, open fortune.",
+  dewlight_paladin: "Full glow, winning wishes.",
 } as const satisfies Readonly<Record<ClassKey, string>>;
 
 function fnv1a(value: string): number {

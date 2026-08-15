@@ -14,15 +14,15 @@ function card(id: string, stats: Stats): Card {
     id,
     class: {
       key: "dry_mage",
-      name: "乾燥大法師",
+      name: "Caster of the Dry Season",
       nameEn: "Dry Mage",
       flavor: "test",
     },
     rarity: "common",
     weirdness: 0,
     stats,
-    talent: { metric: "moisture", name: "水潤結界" },
-    curse: { metric: "moisture", name: "水潤", score: 10 },
+    talent: { metric: "moisture", name: "Dew Ward" },
+    curse: { metric: "moisture", name: "Moisture", score: 10 },
     rawScores: {
       oiliness: 50,
       moisture: 50,

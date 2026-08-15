@@ -33,7 +33,7 @@ describe("buildStats", () => {
     });
   });
 
-  it("names grit as 風霜", () => {
-    expect(STAT_LABELS.grit).toBe("風霜");
+  it("names grit as Weathering", () => {
+    expect(STAT_LABELS.grit).toBe("Weathering");
   });
 });

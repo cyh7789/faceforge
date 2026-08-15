@@ -32,14 +32,14 @@ function buildPresetCard(
 
 export const APPRENTICE_MOCHI = buildPresetCard(puffFixture, {
   id: PRESET_CARD_IDS.APPRENTICE_MOCHI,
-  name: "見習生麻糬",
+  name: "Rookie of the Puffed Cheeks",
   nameEn: "Apprentice Mochi",
   npcStrategy: "apprentice",
 });
 
 export const GRIMACE_MASTER = buildPresetCard(squintFixture, {
   id: PRESET_CARD_IDS.GRIMACE_MASTER,
-  name: "鬼臉宗師",
+  name: "Master of the Squint",
   nameEn: "Grimace Master",
   npcStrategy: "master",
 });

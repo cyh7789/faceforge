@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { APPRENTICE_MOCHI } from "@/lib/engine/presets";
-import { CollectionCardDetail } from "./page";
+import CollectionHome, { CollectionCardDetail } from "./page";
 
 vi.mock("next/image", () => ({
   default: () => null,
@@ -28,5 +28,17 @@ describe("CollectionCardDetail", () => {
     expect(html).toContain("Tap the card to flip");
     expect(html).toContain("Save Card Image");
     expect(html).toContain(`View card back: ${APPRENTICE_MOCHI.class.nameEn}`);
+  });
+});
+
+describe("CollectionHome", () => {
+  it("places the primary game actions before the full collection grid", () => {
+    const html = renderToStaticMarkup(createElement(CollectionHome));
+    const actionsIndex = html.indexOf('aria-label="Game modes"');
+    const collectionIndex = html.indexOf('aria-labelledby="collection-title"');
+
+    expect(actionsIndex).toBeGreaterThanOrEqual(0);
+    expect(collectionIndex).toBeGreaterThan(actionsIndex);
+    expect(html).toContain("Forge a fighter");
   });
 });

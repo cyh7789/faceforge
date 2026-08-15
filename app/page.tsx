@@ -201,7 +201,18 @@ export default function CollectionHome() {
         </p>
       </header>
 
-      <section className="sticker-panel mt-6 p-4" aria-labelledby="collection-title">
+      <nav className="mt-5 grid grid-cols-2 gap-3" aria-label="Game modes">
+        <Link href="/draw" className="sticker-button sticker-button-primary">
+          <span className="text-lg">Draw</span>
+          <small>Forge a fighter</small>
+        </Link>
+        <Link href="/battle" className="sticker-button sticker-button-secondary">
+          <span className="text-lg">Battle</span>
+          <small>Quick or 2 players</small>
+        </Link>
+      </nav>
+
+      <section className="sticker-panel mt-5 p-4" aria-labelledby="collection-title">
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-[11px] font-black tracking-[0.18em] text-ff-pink-deep">
@@ -280,17 +291,6 @@ export default function CollectionHome() {
           })}
         </div>
       </section>
-
-      <nav className="mt-5 grid grid-cols-2 gap-3" aria-label="Game modes">
-        <Link href="/draw" className="sticker-button sticker-button-primary">
-          <span className="text-lg">Draw</span>
-          <small>Forge a card</small>
-        </Link>
-        <Link href="/battle" className="sticker-button sticker-button-secondary">
-          <span className="text-lg">Battle</span>
-          <small>Quick or 2 players</small>
-        </Link>
-      </nav>
 
       {selected && (
         <CollectionCardDetail

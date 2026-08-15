@@ -14,10 +14,10 @@ describe("NPC preset cards", () => {
     expect(APPRENTICE_MOCHI).toMatchObject({
       id: PRESET_CARD_IDS.APPRENTICE_MOCHI,
       isPreset: true,
-      name: "見習生麻糬",
+      name: "Rookie of the Puffed Cheeks",
       nameEn: "Apprentice Mochi",
       npcStrategy: "apprentice",
-      class: { key: "crater_warden", name: "隕坑守望者" },
+      class: { key: "crater_warden", name: "Guardian of the Lunar Surface" },
       rarity: "common",
     });
     expect(APPRENTICE_MOCHI.rawScores).toEqual(
@@ -29,10 +29,10 @@ describe("NPC preset cards", () => {
     expect(GRIMACE_MASTER).toMatchObject({
       id: PRESET_CARD_IDS.GRIMACE_MASTER,
       isPreset: true,
-      name: "鬼臉宗師",
+      name: "Master of the Squint",
       nameEn: "Grimace Master",
       npcStrategy: "master",
-      class: { key: "drooping_regent", name: "垂簾聽政者" },
+      class: { key: "drooping_regent", name: "Ruler of the Half-Closed Eye" },
       rarity: "legendary",
     });
     expect(GRIMACE_MASTER.rawScores).toEqual(

@@ -544,25 +544,36 @@ export default function DrawCameraPage() {
             Camera unavailable. Please choose a photo from your album instead.
           </p>
         )}
-        <button
-          type="button"
-          className={styles.shutter}
-          onClick={captureFrame}
-          disabled={!shutterEnabled}
-          aria-label={shutterEnabled ? "Take photo" : "Take photo, unavailable until face is ready"}
+        <div
+          className={styles.sourceActions}
+          role="group"
+          aria-label="Choose a photo source"
         >
-          <span />
-        </button>
+          <div className={styles.cameraAction}>
+            <button
+              type="button"
+              className={styles.shutter}
+              onClick={captureFrame}
+              disabled={!shutterEnabled}
+              aria-label={shutterEnabled ? "Take photo" : "Take photo, unavailable until face is ready"}
+            >
+              <span />
+            </button>
+            <strong>Take Photo</strong>
+          </div>
 
-        <button
-          type="button"
-          className={styles.uploadButton}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          or choose from album
-        </button>
+          <button
+            type="button"
+            className={styles.uploadButton}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <span className={styles.uploadIcon} aria-hidden="true">▣</span>
+            <strong>Choose Photo</strong>
+            <small>Pick from your album</small>
+          </button>
+        </div>
         <p className={styles.albumHint}>
-          No legendaries in your album
+          Same face check. Same chance at glory.
         </p>
         <input
           ref={fileInputRef}

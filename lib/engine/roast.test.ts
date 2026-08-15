@@ -4,7 +4,7 @@ import { CLASS_BY_WEAKEST, PALADIN } from "./classify";
 import { pickRoast, ROAST_LIBRARY } from "./roast";
 import type { Curse } from "./types";
 
-const CURSE: Curse = { metric: "pore", name: "毛孔", score: 45.2 };
+const CURSE: Curse = { metric: "pore", name: "Pores", score: 45.2 };
 
 describe("roast library", () => {
   it("contains 3 to 5 lines for every collectible class", () => {
