@@ -40,22 +40,32 @@ async function draw(page, image) {
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    args: [
+      "--use-fake-ui-for-media-stream",
+      "--use-fake-device-for-media-stream",
+      `--use-file-for-fake-video-capture=${path.resolve("video-assets/fakecam/p1.y4m")}`,
+    ],
+  });
   const context = await browser.newContext({
     viewport: { width: 430, height: 932 },
     deviceScaleFactor: 2,
+    permissions: ["camera"],
   });
   const page = await context.newPage();
 
   await page.goto(BASE_URL);
   await page.evaluate(() => localStorage.clear());
 
-  // 1. 本地 face gate 通過
-  await draw(page, P1);
-  await beat(800);
+  // 1. 相機即時預覽，本地 face gate 判定 Ready
+  await page.goto(`${BASE_URL}/draw`);
+  await page.waitForSelector("[role='status']:has-text('Ready')", { timeout: 30_000 });
+  await beat(1200);
   await shot(page, "01-face-gate");
 
   // 2. 卡片揭示
+  await page.click("button[aria-label^='Take photo']");
+  await beat(1500);
   await page.click("text=Consult Mirror");
   await page.waitForSelector("text=Tap to reveal", { timeout: 90_000 });
   await page.click("button[aria-label^='Reveal card']");
