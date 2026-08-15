@@ -66,6 +66,8 @@ The design decision that shaped everything: measure the API first, design the ga
 
 **We assumed the visible score was the score.** The API returns both a raw score and a UI score, and they disagree by more than 30 points in the low range. A game about deviation needs the unflattered signal, so we rebuilt the engine on raw scores after the first prototype produced cards that were all too similar.
 
+**We assumed a face filling the frame was the ideal input.** It is not. Push in too close and the API returns `error_src_face_out_of_bound`, which our proxy had been folding into a generic upstream failure, so the player only saw "the mirror went cloudy" with no way to act on it. It now maps to its own 422 and a message that tells you to back off, which is the difference between a dead end and a retry.
+
 **We assumed our test faces were representative.** They are AI-generated, and the API's calibration is documented for real photography, so our rarity thresholds carry that caveat. We state it rather than hide it, and the recalibration path is a per-user baseline: compare a player's neutral shot against their own grimace instead of a global threshold.
 
 ## What we learned

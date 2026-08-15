@@ -8,7 +8,10 @@ DUR=${DUR:-40}
 
 # 人臉來源：走相機路徑時餵這支，本地 gate 會判定 Ready 並開放快門
 ffmpeg -y -v error -loop 1 -t "$DUR" -i video-assets/p1-crop.jpg \
-  -vf "scale=540:-2,pad=540:960:(ow-iw)/2:(oh-ih)/2:color=0x2a1a33,format=yuv420p" \
+  -filter_complex "[0:v]split[bg][fg];\
+[bg]scale=-2:960,crop=540:960,gblur=sigma=26,eq=brightness=-0.07[bgb];\
+[fg]scale=540:-2[fgs];\
+[bgb][fgs]overlay=(W-w)/2:(H-h)/2,format=yuv420p" \
   -r 12 "$OUT/p1.y4m"
 
 ls -la "$OUT"

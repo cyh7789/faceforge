@@ -42,6 +42,7 @@ const FIXTURES: readonly unknown[] = [
 
 type AnalyzeError =
   | "face_too_small"
+  | "face_out_of_bound"
   | "no_face"
   | "file_too_large"
   | "upstream_error";
@@ -85,6 +86,9 @@ function classifyUpstreamError(message: string | undefined, httpStatus?: number)
     normalized.includes("payload too large")
   ) {
     return new AnalyzeFailure("file_too_large", 413);
+  }
+  if (normalized.includes("face_out_of_bound")) {
+    return new AnalyzeFailure("face_out_of_bound", 422);
   }
   if (
     normalized.includes("face_too_small") ||

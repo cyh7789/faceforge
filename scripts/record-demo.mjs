@@ -55,7 +55,12 @@ async function drawCard(page, imagePath, label, markId, useCamera = false) {
   }
   await page.click("text=Consult Mirror");
   // 魔鏡動畫 + 真 API（實測 5 秒上下）→ 卡片就緒後停在背面等玩家翻
-  await page.waitForSelector("text=Tap to reveal", { timeout: 90_000 });
+  await page.waitForSelector("text=Tap to reveal", { timeout: 90_000 }).catch(async (error) => {
+    await page.screenshot({ path: `${OUT_DIR}/fail-${markId}.png` });
+    const text = await page.locator("main").innerText().catch(() => "");
+    console.log("REVEAL FAILED:", text.slice(0, 300));
+    throw error;
+  });
   await beat(1800);
   mark(`${markId}_card`);
   await page.click("button[aria-label^='Reveal card']");
@@ -184,7 +189,7 @@ async function recordGate() {
   const start = Date.now();
   gateMarks.push({ label: "camera_blocked", at: 0 });
   await beat(9000);
-  await page.setInputFiles("#face-upload", path.resolve("video-assets/no-face.jpg"));
+  await page.setInputFiles("#face-upload", path.resolve("video-assets/upload-card.png"));
   await page.waitForSelector("text=Choose another photo with a face", { timeout: 30_000 });
   gateMarks.push({ label: "upload_blocked", at: (Date.now() - start) / 1000 });
   await beat(11000);

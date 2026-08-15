@@ -3,6 +3,7 @@ import styles from "./reveal.module.css";
 export type AnalyzeErrorCode =
   | "face_too_small"
   | "no_face"
+  | "face_out_of_bound"
   | "file_too_large"
   | "upstream_error"
   | "missing_photo";
@@ -21,6 +22,12 @@ const ERROR_COPY: Readonly<
     subtitle: "The mirror can't find a face!",
     detail:
       "Keep one clear, uncovered face centered in the frame.",
+  },
+  face_out_of_bound: {
+    title: "Too close to the mirror!",
+    subtitle: "Your face runs past the edge!",
+    detail:
+      "Back off a little so your whole face fits inside the frame.",
   },
   file_too_large: {
     title: "That portrait is too mighty!",

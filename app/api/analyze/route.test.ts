@@ -81,6 +81,7 @@ describe("POST /api/analyze", () => {
   it.each([
     ["error_src_face_too_small", "face_too_small", 422],
     ["[DLQ] Max retries exhausted. Last error: list index out of range", "face_too_small", 422],
+    ["error_src_face_out_of_bound", "face_out_of_bound", 422],
     ["error_src_no_face", "no_face", 422],
     ["error_src_face_not_detected", "no_face", 422],
     ["exceed_max_filesize", "file_too_large", 413],
