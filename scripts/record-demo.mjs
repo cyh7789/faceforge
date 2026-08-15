@@ -169,7 +169,7 @@ async function recordGate() {
     args: [
       "--use-fake-ui-for-media-stream",
       "--use-fake-device-for-media-stream",
-      `--use-file-for-fake-video-capture=${path.resolve("video-assets/fakecam/noface.y4m")}`,
+      `--use-file-for-fake-video-capture=${path.resolve("video-assets/fakecam/p1.y4m")}`,
     ],
   });
   const context = await browser.newContext({
@@ -193,6 +193,11 @@ async function recordGate() {
   await context.close();
   await browser.close();
   console.log("gate clip recorded");
+}
+
+if (process.env.ONLY_GATE === "1") {
+  await recordGate();
+  process.exit(0);
 }
 
 main().catch((error) => {

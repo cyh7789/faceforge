@@ -29,18 +29,19 @@
 | 06 | 0:39–0:55 | 圖鑑兩格點亮 → 點卡 → 翻面看星座卡背 | Fifteen classes to unlock, one for every metric the API scores. The API is deterministic to fourteen decimal places, so the same face always forges the same card. Flip it, and the back draws your own wrinkle constellation. |
 | 07 | 0:55–1:01 | Battle → 2 Players → 選卡 → Lock P1 → 交接 → Enter Arena | Now put that face in the ring. Pick your fighter, lock it in, pass the phone. Best of three. |
 | 08 | 1:01–1:13 | BO3 三回合快切：選 stat → REVEAL → hit-stop → 結果與 roast（裁成 canvas 區放大） | Round one. Pick a stat, hope yours is higher. Round two. Round three. Loser gets roasted by the mirror. Every number on screen came out of a real API response. |
-| 09 | 1:13–1:33 | 鏡頭對著沒有臉的畫面：紅框、Find your face、快門變灰 → 再上傳無臉照，同樣被本地擋下 | Everything here is built on measured API behavior. Point the camera at anything without a face and the shutter stays locked. Bad photos cost seventy-eight seconds of silent retries, so the gate stops them on the device and spends nothing. The flattering UI scores hide the interesting signal, so the whole engine runs on raw scores. |
+| 09 | 1:13–1:33 | 相機對著臉：綠框 Ready、快門開放 → 改從相簿選一張無臉照，本地 gate 直接擋下，Consult Mirror 變灰 | Everything here is built on measured API behavior. A bad photo costs seventy-eight seconds of silent retries, so every shot is checked on the device first. No face, and it never leaves the phone or spends a single unit. The flattering UI scores hide the interesting signal, so the whole engine runs on raw scores. |
 | 10 | 1:33–1:39 | 回圖鑑收尾 | Skin analysis tells you your face is flawed. FaceForge says your face is legendary. |
 
 ## 產出鏈
 
-1. `bash scripts/make-vo.sh` — 生 TTS 分段並印長度
-2. `node scripts/record-demo.mjs` — Playwright 走完流程，錄主片與 gate 片並各寫 marks.json（需先 `next build && next start`，並先產生 `video-assets/fakecam/*.y4m`）
-3. `python3 scripts/make_intro.py` — 街機開場卡
-4. `python3 scripts/build_video.py` — 依 marks 切段、對齊旁白、套側欄、串接
-5. `node scripts/shoot-screenshots.mjs` — Devpost 用五張截圖
+1. `bash scripts/make-fakecam.sh` — 生假攝影機 y4m（很大，不進版控）
+2. `bash scripts/make-vo.sh` — 生 TTS 分段並印長度
+3. `node scripts/record-demo.mjs` — Playwright 走完流程，錄主片與 gate 片並各寫 marks.json（需先 `next build && next start`，並先產生 `video-assets/fakecam/*.y4m`）
+4. `python3 scripts/make_intro.py` — 街機開場卡
+5. `python3 scripts/build_video.py` — 依 marks 切段、對齊旁白、套側欄、串接
+6. `node scripts/shoot-screenshots.mjs` — Devpost 用五張截圖
 
-成品：`video-assets/faceforge-demo.mp4`（94.3 秒，1920x1080，真 API 錄製）
+成品：`video-assets/faceforge-demo.mp4`（93.9 秒，1920x1080，真 API 錄製）
 
 ## 錄製規格
 

@@ -35,7 +35,7 @@ SEGMENTS = [
     ("06", "collection", "ALBUM", ["Wrinkle constellation", "Drawn from your scan", "Card back art"]),
     ("07", "battle", "READY", ["Best of three", "Stat duel", "Same device 2P"]),
     ("08", "rounds", "FIGHT", ["Six stats per card", "All from raw scores", "Loser gets roasted"], 0.0, 0.80),
-    ("09", "camera_blocked", "CREDIT FIREWALL", ["Shutter stays locked", "78s wasted per bad photo", "Zero units spent"], 0.0, None),
+    ("09", "camera_blocked", "CREDIT FIREWALL", ["78s wasted per bad photo", "Checked on device", "Zero units spent"], 0.0, None),
     ("10", "outro", "FACEFORGE", ["Your face is legendary", "youcam skin analysis api", ""]),
 ]
 
