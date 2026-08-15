@@ -91,7 +91,7 @@ next.js, typescript, tailwind-css, youcam-skin-analysis-api, mediapipe, phaser, 
 ## Links
 
 - GitHub: https://github.com/cyh7789/faceforge
-- Demo video: (YouTube link, pending upload)
+- Demo video: https://youtu.be/Q7UgsIm-Es8
 
 ## YouTube upload
 
